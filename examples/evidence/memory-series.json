@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0.0",
+  "evidenceId": "ev_01JMEMORYSERIES",
+  "missionId": "mis_01JLOCALNODEFAILURE",
+  "taskId": "task_01JRUNTIMEINSPECT",
+  "agentRunId": "run_01JRUNTIMEINSPECT",
+  "type": "metric",
+  "source": {
+    "type": "local-runtime-snapshot",
+    "identifier": "/workspace/service/fixtures/system/metrics.json",
+    "resourceId": "process:node-api:4122"
+  },
+  "collector": {
+    "toolId": "runtime.metrics-read",
+    "toolVersion": "0.1.0",
+    "toolCallId": "call_01JMEMORYSERIES"
+  },
+  "collectedAt": "2026-08-02T19:04:00Z",
+  "observedRange": {
+    "from": "2026-08-02T18:52:00Z",
+    "to": "2026-08-02T18:58:00Z",
+    "uncertaintySeconds": 2
+  },
+  "content": {
+    "kind": "inline",
+    "format": "application/json",
+    "value": {
+      "metric": "process.resident_memory_bytes",
+      "first": 440401920,
+      "last": 1932735283,
+      "samples": 37
+    }
+  },
+  "contentHash": {
+    "algorithm": "sha256",
+    "value": "9a1aa77d438648956f8dfb6d8225bbca5f85fba16c8e1055fc39b8ce6f8b10d1"
+  },
+  "integrity": "captured",
+  "sensitivity": "internal",
+  "independenceGroup": "runtime-host-1",
+  "sourceReliability": {
+    "score": 0.9,
+    "rationale": "The series was collected from the local process monitor before the investigation and contains a continuous sample window."
+  },
+  "redaction": {
+    "applied": false,
+    "categories": [],
+    "removedCount": 0
+  },
+  "tags": ["nodejs", "memory", "runtime"]
+}
