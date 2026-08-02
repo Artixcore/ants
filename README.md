@@ -16,11 +16,12 @@ It investigates technical failures through bounded Scout, Investigator, Validato
 
 ## Current status
 
-Version `0.3.1` is a security-hardening release for the working **Phase 3 Local Incident-Investigation MVP**.
+Version `0.3.1` provides a security-hardened **Phase 3 Local Incident-Investigation MVP**.
 
 The MVP can:
 
 - validate strict local read-only missions;
+- create a safe starter mission with the CLI;
 - inspect scoped files without following symlinks or escaping the workspace;
 - analyze logs, runtime diagnostics, JavaScript and TypeScript source, `package.json`, Git history, and recent Git changes;
 - detect Node.js heap exhaustion, port conflicts, disk exhaustion, missing modules, and unhandled errors;
@@ -33,30 +34,6 @@ The MVP can:
 - write Markdown, JSON, JSONL, graph, hypothesis, and audit artifacts.
 
 Ants does **not** remediate systems in Phase 3. It does not contact cloud services, execute arbitrary shell strings, call hosted language models, or mutate files being investigated.
-
-## Security hardening in v0.3.1
-
-The codebase received a focused security and reliability review. The release adds:
-
-- bounded file reads that do not load oversized files fully into memory;
-- binary-file detection;
-- strict mission and nested-field validation, including a one MiB mission-file limit;
-- rejection of absolute and parent-traversal mission patterns;
-- enforced permission scopes inside the Tool Gateway;
-- Git execution with external diff drivers and text conversion disabled;
-- isolated Git configuration and reduced subprocess environment exposure;
-- output writes restricted to the workspace `.ants` directory;
-- symlink checks for workspace and output paths;
-- random, exclusive temporary files for atomic report writes;
-- stronger token and credential redaction;
-- sanitized error serialization and terminal output;
-- audited authorization and malformed tool-call failures;
-- budget-exempt safety reporting so an exhausted investigation can still produce a partial report;
-- optional Git collection that no longer fails missions without Git permission;
-- corrected secret handling when `pauseOnSecretDetection` is disabled;
-- dependency auditing and automated dependency update configuration.
-
-Read the public policy in [`SECURITY.md`](SECURITY.md) and the implementation threat model in [`docs/security.md`](docs/security.md).
 
 ## Quick start
 
@@ -73,24 +50,85 @@ npm run check
 npm run demo
 ```
 
-The demo creates an isolated two-commit service, investigates a deterministic memory crash, and writes its report under the demo workspace's `.ants` directory.
+The demo creates an isolated two-commit service, investigates a deterministic memory crash, and writes its report under the temporary demo workspace's `.ants` directory.
 
-Expected leading conclusion:
+The repository now includes a valid starter mission at [`mission.json`](mission.json), so this command works immediately:
+
+```bash
+node src/cli.js validate mission.json
+```
+
+Expected demo conclusion:
 
 ```text
 The Node.js process crashed because upload processing exhausted the
 JavaScript heap through full-file buffering, copying, or retained buffers.
 ```
 
+## Use Ants on your own project
+
+A mission describes what Ants may inspect. Create one inside the Node.js project you want to investigate.
+
+### Git Bash on Windows
+
+```bash
+cd /d/path/to/your-node-project
+node /d/ants/src/cli.js init mission.json
+node /d/ants/src/cli.js validate mission.json
+node /d/ants/src/cli.js investigate mission.json --workspace .
+```
+
+### PowerShell
+
+```powershell
+Set-Location D:\path\to\your-node-project
+node D:\ants\src\cli.js init mission.json
+node D:\ants\src\cli.js validate mission.json
+node D:\ants\src\cli.js investigate mission.json --workspace .
+```
+
+The generated report will be written to:
+
+```text
+<your-project>/.ants/runs/<mission-id>/
+```
+
+Edit `mission.json` before investigating when your project uses different source, log, or diagnostic directories.
+
 ## CLI
+
+### Create a starter mission
+
+```bash
+node src/cli.js init mission.json
+```
+
+The command:
+
+- creates a new valid read-only mission;
+- generates a unique mission ID;
+- writes only inside the current working directory;
+- requires a `.json` file name;
+- refuses absolute paths and `..` traversal;
+- refuses to overwrite an existing file.
+
+The Ants repository already contains `mission.json`, so run `init` inside the project you want to investigate rather than inside the Ants repository.
 
 ### Validate a mission
 
 ```bash
-node src/cli.js validate ./mission.json
+node src/cli.js validate mission.json
 ```
 
+When the file is missing, the CLI now prints an actionable instruction to create it with `init`.
+
 ### Investigate a workspace
+
+```bash
+node src/cli.js investigate mission.json --workspace .
+```
+
+Or investigate another directory:
 
 ```bash
 node src/cli.js investigate ./mission.json \
@@ -180,6 +218,7 @@ A mission defines:
 
 See:
 
+- [`mission.json`](mission.json)
 - [`examples/incidents/node-memory-crash/mission.json`](examples/incidents/node-memory-crash/mission.json)
 - [`examples/missions/node-service-failure.json`](examples/missions/node-service-failure.json)
 - [`schemas/mission.schema.json`](schemas/mission.schema.json)
@@ -225,8 +264,9 @@ Confidence values are deterministic engineering heuristics, not statistical prob
 9. No general-purpose shell tool exists.
 10. Secret-like content is redacted before evidence storage.
 11. Report writes use exclusive temporary files and atomic replacement beneath `.ants`.
-12. A safety report may bypass an exhausted investigation budget, but it cannot call investigation tools.
-13. No remediation or production mutation is performed.
+12. Starter mission creation refuses overwrites and unsafe output paths.
+13. A safety report may bypass an exhausted investigation budget, but it cannot call investigation tools.
+14. No remediation or production mutation is performed.
 
 ## Project structure
 
@@ -234,7 +274,7 @@ Confidence values are deterministic engineering heuristics, not statistical prob
 src/
 ├── agents/       Scout, Investigator, Validator, Reporter
 ├── analysis/     Deterministic source signals
-├── core/         Mission, budgets, scheduler, IDs, safe errors
+├── core/         Mission, starter template, budgets, scheduler, IDs, safe errors
 ├── demo/         Reproducible demo workspace builder
 ├── security/     Path, output, redaction, and safe-write controls
 ├── store/        Evidence and graph persistence
@@ -254,7 +294,7 @@ npm run check
 npm run security:audit
 ```
 
-The security tests cover malformed missions, traversal, symlink escape, bounded reads, binary input, permission-scope enforcement, output isolation, secret redaction, terminal controls, report survival after budget exhaustion, and malicious Git diff drivers.
+The test suite covers first-run mission creation, missing-file guidance, malformed missions, traversal, symlink escape, bounded reads, binary input, permission-scope enforcement, output isolation, secret redaction, terminal controls, report survival after budget exhaustion, and malicious Git diff drivers.
 
 ## Architecture and documentation
 

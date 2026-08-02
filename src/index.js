@@ -3,6 +3,7 @@ export const PROJECT_VERSION = '0.3.1';
 
 export { investigateLocal } from './controller.js';
 export { loadMission, validateMission } from './core/mission.js';
+export { createStarterMission, writeStarterMission } from './core/mission-template.js';
 export { createDemoWorkspace } from './demo/create-demo-workspace.js';
 
 export function getProjectInfo() {

@@ -21,13 +21,33 @@ The engine reads local artifacts only. It does not call hosted language models, 
 
 ## CLI
 
-Validate a mission:
+Create a starter mission in the current project directory:
+
+```bash
+node /path/to/ants/src/cli.js init mission.json
+```
+
+The command creates a unique read-only mission and refuses to overwrite an existing file. It rejects absolute paths, parent traversal, and non-JSON output names.
+
+The Ants repository includes a ready-to-use root [`mission.json`](../mission.json), so this works immediately after cloning:
+
+```bash
+node src/cli.js validate mission.json
+```
+
+Validate another mission:
 
 ```bash
 node src/cli.js validate ./mission.json
 ```
 
-Investigate a workspace with the default output path:
+Investigate the current project with the default output path:
+
+```bash
+node /path/to/ants/src/cli.js investigate mission.json --workspace .
+```
+
+Investigate another workspace:
 
 ```bash
 node src/cli.js investigate ./mission.json --workspace ./service
@@ -46,6 +66,8 @@ Run the deterministic example:
 ```bash
 npm run demo
 ```
+
+If a validation path does not exist, the CLI reports that the mission is missing and shows the `init` command instead of returning only an operating-system error code.
 
 ## Mission validation
 
@@ -136,6 +158,7 @@ Output path components may not be symlinks. Artifacts use exclusive random tempo
 
 ## Error handling
 
+- Missing mission files receive an actionable `init` instruction.
 - Tool failures are normalized before they reach reports or terminal output.
 - Common secret formats are redacted from errors.
 - ANSI and dangerous control characters are removed.
