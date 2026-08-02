@@ -7,26 +7,26 @@
   "scope": {
     "environment": "local",
     "include": [
-      "/workspace/service/logs/**",
-      "/workspace/service/src/**",
-      "/workspace/service/package.json",
-      "/workspace/service/.git"
+      "logs/**",
+      "src/**",
+      "package.json"
     ],
     "exclude": [
-      "/workspace/service/.env",
-      "/workspace/service/node_modules/**"
+      ".env",
+      "node_modules/**",
+      ".ants/**"
     ]
   },
   "permissions": [
     {
       "resourceType": "filesystem",
       "operation": "read",
-      "scope": "/workspace/service/**"
+      "scope": "**"
     },
     {
       "resourceType": "git",
       "operation": "read",
-      "scope": "/workspace/service"
+      "scope": "."
     }
   ],
   "budgets": {

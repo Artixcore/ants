@@ -20,6 +20,7 @@ const documentPaths = [
   'docs/tools.md',
   'docs/providers.md',
   'docs/security.md',
+  'docs/security-v0.3.1.md',
   'docs/memory.md',
   'docs/cloud.md',
   'docs/api.md',
@@ -30,7 +31,7 @@ function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'));
 }
 
-test('Phase 2 architecture documents exist', () => {
+test('architecture and security documents exist', () => {
   for (const path of documentPaths) {
     assert.equal(existsSync(path), true, `${path} should exist`);
   }
@@ -47,13 +48,14 @@ test('architecture schemas are valid JSON Schema documents', () => {
   }
 });
 
-test('example mission follows the Phase 2 safety defaults', () => {
+test('example mission follows the current safety defaults', () => {
   const mission = readJson('examples/missions/node-service-failure.json');
 
   assert.equal(mission.schemaVersion, '1.0.0');
   assert.equal(mission.mode, 'read-only');
   assert.equal(mission.scope.environment, 'local');
-  assert.ok(mission.scope.exclude.includes('/workspace/service/.env'));
+  assert.ok(mission.scope.exclude.includes('.env'));
+  assert.ok(mission.scope.include.every((item) => !item.startsWith('/') && !item.includes('..')));
   assert.ok(mission.permissions.every(({ operation }) => operation === 'read'));
   assert.ok(mission.budgets.maxTasks > 0);
   assert.ok(mission.stopConditions.requiredIndependentValidations >= 1);

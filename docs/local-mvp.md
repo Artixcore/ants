@@ -1,22 +1,23 @@
 # Phase 3 Local Incident-Investigation MVP
 
-Status: **Implemented in v0.3.0**
+Status: **Implemented and security-hardened in v0.3.1**
 
-The Phase 3 engine converts the Phase 2 architecture contracts into a bounded, deterministic investigation workflow for local Node.js services.
+The Phase 3 engine converts the Phase 2 contracts into a bounded, deterministic investigation workflow for local Node.js services.
 
-## Supported workflow
+## Workflow
 
 ```text
 Mission JSON
-    -> validation
-    -> scoped filesystem and Git sandbox
+    -> strict validation
+    -> canonical workspace and protected output root
+    -> scoped filesystem and optional Git tools
     -> Scout collection
     -> Investigator hypothesis ranking
     -> Validator cross-source challenge
     -> Reporter persistence
 ```
 
-The engine reads local artifacts only. It does not call hosted language models, access the network, execute arbitrary shell strings, mutate in-scope evidence files, or perform remediation. It writes only report artifacts to the selected output directory.
+The engine reads local artifacts only. It does not call hosted language models, access the network, execute arbitrary shell strings, mutate evidence files, or perform remediation.
 
 ## CLI
 
@@ -26,10 +27,18 @@ Validate a mission:
 node src/cli.js validate ./mission.json
 ```
 
-Investigate a workspace:
+Investigate a workspace with the default output path:
 
 ```bash
-node src/cli.js investigate ./mission.json --workspace ./service --output ./report
+node src/cli.js investigate ./mission.json --workspace ./service
+```
+
+Choose an output directory beneath the workspace `.ants` root:
+
+```bash
+node src/cli.js investigate ./mission.json \
+  --workspace ./service \
+  --output .ants/manual-run
 ```
 
 Run the deterministic example:
@@ -38,17 +47,65 @@ Run the deterministic example:
 npm run demo
 ```
 
+## Mission validation
+
+Phase 3 requires:
+
+- schema version `1.0.0`;
+- `read-only` mode;
+- `local` environment;
+- at least one filesystem permission;
+- only `discover`, `read`, or `analyze` operations;
+- safe relative include, exclude, and permission patterns;
+- finite integer budgets within defined limits;
+- valid stop conditions, reporting flags, requester information, and timestamps;
+- no unknown fields in implemented mission objects;
+- a one MiB mission-file size limit and no symbolic-link mission paths.
+
+Absolute path patterns, `..` traversal, null bytes, unsupported resource types, write permissions, and malformed nested values are rejected.
+
 ## Inputs
 
 The MVP can inspect:
 
 - `.log`, `.out`, and diagnostic text files;
-- structured runtime JSON such as `runtime.json`, `system.json`, `process.json`, and `metrics.json`;
+- runtime JSON such as `runtime.json`, `system.json`, `process.json`, and `metrics.json`;
 - `package.json`;
 - JavaScript and TypeScript source files;
-- an isolated workspace Git log and the latest commit diff.
+- an isolated workspace Git log and latest commit diff.
 
-Mission include and exclude patterns determine which filesystem artifacts may be read. `.env`, `.git` internals, `node_modules`, generated `.ants` output, symlinks, device files, and paths outside the canonical workspace are denied by default.
+Mission scope and permission scope are enforced separately. A file must pass both.
+
+`.env`, `.git` internals, `node_modules`, `.ssh`, private-key files, generated `.ants` output, symlinks, device files, absolute paths, traversal paths, and paths outside the canonical workspace are denied by default.
+
+## Bounded file handling
+
+File reads:
+
+- open the final file without following the final symlink on supported platforms;
+- compare file identity before and after opening;
+- allocate only the permitted prefix;
+- enforce the mission byte budget before reading;
+- cap each file at one MiB by default;
+- identify NUL-containing input as binary and avoid text analysis;
+- redact secret-like values before evidence storage.
+
+## Git handling
+
+Git analysis is optional and runs only when the mission grants Git permission and the workspace contains a non-symlink `.git` directory.
+
+The Git adapter:
+
+- uses fixed argument arrays;
+- disables external diff commands and text-conversion filters;
+- disables pagers, prompts, optional locks, hooks, and filesystem monitors;
+- ignores system and global Git configuration;
+- inherits only a limited environment;
+- caps execution time and output size;
+- redacts secret-like output;
+- records failed and successful calls in the audit trail.
+
+Git worktrees represented by a `.git` file are not supported in Phase 3.
 
 ## Detectors
 
@@ -64,7 +121,9 @@ Memory analysis correlates fatal logs, runtime heap pressure, whole-file reads, 
 
 ## Output
 
-A completed run writes:
+Reports may be written only under `<workspace>/.ants/`.
+
+A run can write:
 
 - `report.md`;
 - `report.json`;
@@ -73,28 +132,38 @@ A completed run writes:
 - `graph.json`;
 - `audit.json`.
 
-Evidence records include provenance, hashes, integrity, sensitivity, redaction metadata, and independence groups. Reports include ranked hypotheses, contradictions, validation outcomes, recommendations, limitations, task history, tool audit events, and budget usage.
+Output path components may not be symlinks. Artifacts use exclusive random temporary files, restrictive file permissions, synchronization, and atomic replacement.
+
+## Error handling
+
+- Tool failures are normalized before they reach reports or terminal output.
+- Common secret formats are redacted from errors.
+- ANSI and dangerous control characters are removed.
+- Authorization failures are audited.
+- Budget exhaustion produces a partial report when the output boundary is still safe.
+- The Reporter task is budget-exempt so safety reporting is not blocked by an exhausted investigation budget.
+- A report-write failure remains fatal because Ants must not claim that an audit artifact exists when persistence failed.
+
+## Secret behavior
+
+When secret-like content is detected:
+
+- the raw value is not stored;
+- a security evidence record describes the category and count;
+- redacted content may be analyzed only when `pauseOnSecretDetection` is `false`;
+- deeper collection stops when `pauseOnSecretDetection` is `true`.
+
+Pattern-based detection cannot identify every secret format.
 
 ## Confidence
 
-Confidence is a deterministic engineering heuristic based on evidence strength, source independence, coverage, temporal relevance, and contradiction penalties. It is not a statistical probability and must not be presented as one.
-
-## Safety boundaries
-
-1. Only `read-only` local missions are accepted.
-2. Write, execute, and delete mission permissions are rejected.
-3. No general shell tool exists.
-4. Git commands use fixed argument arrays with prompting disabled.
-5. Filesystem reads use canonical paths and reject symlinks and path escape.
-6. Secret-like values are redacted. Missions configured with `pauseOnSecretDetection` stop deeper analysis.
-7. Reports are the only files written, and they are written to the selected output directory.
-8. Every tool call is recorded in the audit trail.
+Confidence is a deterministic engineering heuristic based on evidence strength, source independence, coverage, temporal relevance, and contradiction penalties. It is not a statistical probability.
 
 ## Known limitations
 
-- The detector set is intentionally narrow.
-- The MVP requires an isolated `.git` directory inside the workspace for Git evidence.
-- It does not attach to live processes or collect heap profiles.
+- The detector set is narrow.
+- The MVP does not attach to live processes or collect heap profiles.
 - It does not understand arbitrary binary logs.
-- It performs no cloud, CI, or remote repository access.
+- Git subprocesses are bounded but not placed in a separate operating-system container.
+- It performs no cloud, CI, network, or remote repository access.
 - It proposes corrective steps but does not apply them.

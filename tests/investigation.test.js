@@ -17,8 +17,9 @@ test('local MVP identifies the deterministic Node.js heap exhaustion incident', 
   });
 
   assert.equal(report.status, 'completed');
-  assert.equal(report.engineVersion, '0.3.0');
+  assert.equal(report.engineVersion, '0.3.1');
   assert.equal(report.safety.readOnly, true);
+  assert.equal(report.safety.outputRestrictedToWorkspaceAnts, true);
   assert.equal(report.safety.mutationsAttempted, 0);
   assert.match(report.summary, /JavaScript heap/i);
 

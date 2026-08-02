@@ -8,7 +8,7 @@ test('project metadata exposes the Phase 3 safety defaults', () => {
 
   assert.equal(project.name, 'Ants');
   assert.equal(project.organization, 'Artixcore');
-  assert.equal(project.status, 'local-investigation-mvp');
+  assert.equal(project.status, 'local-investigation-mvp-hardened');
   assert.equal(project.autonomy, 'read-only-by-default');
   assert.equal(project.currentPhase, 3);
   assert.equal(project.nextPhase, 'repository-and-ci-integrations');
@@ -23,5 +23,5 @@ test('CLI reports its version', () => {
 
   assert.equal(result.status, 0);
   assert.equal(result.stderr, '');
-  assert.match(result.stdout, /^0\.3\.0\s*$/);
+  assert.match(result.stdout, /^0\.3\.1\s*$/);
 });

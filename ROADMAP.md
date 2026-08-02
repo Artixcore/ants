@@ -24,7 +24,7 @@ Status: **Complete**
 - Investigation graph nodes, edges, temporal model, and pheromone projection
 - Tool Gateway contracts, risk classes, sandbox boundaries, and idempotency
 - Provider-neutral model adapter and capability routing
-- Cloud-provider adapter boundary and normalized resource model
+- Cloud-provider adapter boundary and normalized cloud resource model
 - Working, mission, historical, and static memory rules
 - Threat model, approval matrix, secrets policy, and audit controls
 - Internal command, event, query, error, and versioning contracts
@@ -33,14 +33,20 @@ Status: **Complete**
 
 ## Phase 3: Local incident-investigation MVP
 
-Status: **Complete**
+Status: **Complete and security-hardened in v0.3.1**
 
-- Strict local read-only mission parser and validation
+- Strict local read-only mission parser and nested validation
 - Mission Controller and bounded task scheduler
 - Scout, Investigator, Validator, and Reporter roles
-- Scoped filesystem and Git Tool Gateway
+- Scoped filesystem and optional Git Tool Gateway
 - Log, runtime, source, package, Git-log, and recent-diff collection
-- Secret redaction, canonical-path sandboxing, and symlink denial
+- Canonical workspace enforcement and symlink denial
+- Bounded file reads and binary-file handling
+- Permission-scope enforcement and audited denials
+- Git external-diff and text-conversion isolation
+- Secret redaction and configurable pause behavior
+- Output confinement to the workspace `.ants` directory
+- Exclusive temporary files and atomic artifact replacement
 - Structured evidence store with provenance and hashes
 - Persistent investigation graph
 - Ranked hypotheses with independence and contradiction scoring
@@ -49,7 +55,7 @@ Status: **Complete**
 - Markdown and JSON reports
 - Tool audit trail
 - Reproducible Node.js heap-exhaustion fixture
-- End-to-end CLI and safety tests
+- End-to-end CLI, validation, sandbox, redaction, and security regression tests
 
 ## Phase 4: Repository and CI integrations
 

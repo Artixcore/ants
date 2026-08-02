@@ -1,10 +1,11 @@
 # Ants Documentation
 
-Ants documentation is divided into normative architecture contracts and implemented milestone notes.
+Ants documentation is divided into implemented behavior, security reviews, normative architecture contracts, and machine-readable schemas.
 
 ## Implemented behavior
 
-- [`local-mvp.md`](local-mvp.md): Phase 3 local incident-investigation engine, CLI, inputs, outputs, detectors, safety boundaries, and limitations.
+- [`local-mvp.md`](local-mvp.md): Phase 3 local incident-investigation engine, CLI, inputs, outputs, detectors, security boundaries, and limitations.
+- [`security-v0.3.1.md`](security-v0.3.1.md): focused v0.3.1 code-security review, corrected findings, regression coverage, and residual risks.
 
 ## Normative architecture
 
@@ -28,4 +29,4 @@ See [`adr/README.md`](adr/README.md).
 
 See [`../schemas/README.md`](../schemas/README.md).
 
-Documentation must distinguish implemented behavior from planned behavior. Phase 3 code implements only local read-only investigation; repository, CI, cloud, and controlled-remediation capabilities remain future work.
+Documentation must distinguish implemented behavior from planned behavior. Version 0.3.1 implements only local read-only investigation. Repository, CI, cloud, and controlled-remediation capabilities remain future work.

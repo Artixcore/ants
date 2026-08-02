@@ -2,7 +2,7 @@ import { BudgetExceededError } from './errors.js';
 
 export class BudgetTracker {
   constructor(budgets, { now = () => Date.now() } = {}) {
-    this.limits = { ...budgets };
+    this.limits = Object.freeze({ ...budgets });
     this.now = now;
     this.startedAtMs = now();
     this.usage = {
@@ -27,24 +27,25 @@ export class BudgetTracker {
 
   consumeTask() {
     this.assertTime();
-    this.usage.tasks += 1;
-    this.#assertLimit('tasks', 'maxTasks');
+    this.#consume('tasks', 'maxTasks', 1);
   }
 
   consumeToolCall() {
     this.assertTime();
-    this.usage.toolCalls += 1;
-    this.#assertLimit('toolCalls', 'maxToolCalls');
+    this.#consume('toolCalls', 'maxToolCalls', 1);
   }
 
   consumeBytes(count) {
-    this.usage.bytesRead += Math.max(0, count);
-    if (Number.isFinite(this.limits.maxBytesRead) && this.usage.bytesRead > this.limits.maxBytesRead) {
-      throw new BudgetExceededError('Mission byte-read budget exceeded.', {
-        actual: this.usage.bytesRead,
-        limit: this.limits.maxBytesRead
-      });
+    if (!Number.isSafeInteger(count) || count < 0) {
+      throw new BudgetExceededError('Byte usage must be a non-negative safe integer.', { count });
     }
+    this.#consume('bytesRead', 'maxBytesRead', count, 'Mission byte-read budget exceeded.');
+  }
+
+  remainingBytes() {
+    const limit = this.limits.maxBytesRead;
+    if (!Number.isFinite(limit)) return Number.POSITIVE_INFINITY;
+    return Math.max(0, limit - this.usage.bytesRead);
   }
 
   markProgress(progressMade) {
@@ -59,13 +60,12 @@ export class BudgetTracker {
     });
   }
 
-  #assertLimit(usageKey, limitKey) {
+  #consume(usageKey, limitKey, amount, message = `${limitKey} exceeded.`) {
+    const next = this.usage[usageKey] + amount;
     const limit = this.limits[limitKey];
-    if (Number.isFinite(limit) && this.usage[usageKey] > limit) {
-      throw new BudgetExceededError(`${limitKey} exceeded.`, {
-        actual: this.usage[usageKey],
-        limit
-      });
+    if (Number.isFinite(limit) && next > limit) {
+      throw new BudgetExceededError(message, { actual: next, limit });
     }
+    this.usage[usageKey] = next;
   }
 }

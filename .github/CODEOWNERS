@@ -1,0 +1,9 @@
+* @Artixcore
+
+/src/security/ @Artixcore
+/src/tools/ @Artixcore
+/src/core/mission.js @Artixcore
+/src/controller.js @Artixcore
+/.github/workflows/ @Artixcore
+/SECURITY.md @Artixcore
+/LICENSE @Artixcore
