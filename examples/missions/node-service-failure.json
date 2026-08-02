@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0.0",
+  "missionId": "mis_01JLOCALNODEFAILURE",
+  "title": "Investigate local Node.js service failure",
+  "objective": "Determine the most likely cause of the service crash using local logs, system metadata, source code, and Git history.",
+  "mode": "read-only",
+  "scope": {
+    "environment": "local",
+    "include": [
+      "/workspace/service/logs/**",
+      "/workspace/service/src/**",
+      "/workspace/service/package.json",
+      "/workspace/service/.git"
+    ],
+    "exclude": [
+      "/workspace/service/.env",
+      "/workspace/service/node_modules/**"
+    ]
+  },
+  "permissions": [
+    {
+      "resourceType": "filesystem",
+      "operation": "read",
+      "scope": "/workspace/service/**"
+    },
+    {
+      "resourceType": "git",
+      "operation": "read",
+      "scope": "/workspace/service"
+    }
+  ],
+  "budgets": {
+    "durationSeconds": 900,
+    "maxTasks": 30,
+    "maxTaskDepth": 6,
+    "maxToolCalls": 100,
+    "maxModelTokens": 150000,
+    "maxEstimatedCostUsd": 5,
+    "maxBytesRead": 52428800,
+    "maxRetriesPerTask": 2
+  },
+  "stopConditions": {
+    "minimumConfidence": 0.75,
+    "requiredIndependentValidations": 1,
+    "maxNoProgressTasks": 5,
+    "completeWhenDefensible": true,
+    "pauseOnSecretDetection": true
+  },
+  "reporting": {
+    "format": "markdown+json",
+    "includeEvidenceIndex": true,
+    "includeContradictions": true,
+    "includeLimitations": true
+  },
+  "requestedBy": {
+    "type": "user",
+    "id": "local-user"
+  },
+  "knownFacts": [
+    "The process exited unexpectedly during image upload traffic."
+  ],
+  "sensitivity": "internal",
+  "retentionDays": 30,
+  "providerPreferences": {
+    "allowedProviders": ["local", "approved-hosted"],
+    "preferLocal": true,
+    "maximumTier": "reasoning"
+  },
+  "createdAt": "2026-08-02T19:00:00Z"
+}
