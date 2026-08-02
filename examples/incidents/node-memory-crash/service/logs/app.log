@@ -1,0 +1,10 @@
+2026-08-02T18:58:01.000Z INFO upload request started file=hero-01.png
+2026-08-02T18:58:02.000Z INFO memory heapUsed=421 MB heapLimit=512 MB rss=468 MB
+2026-08-02T18:58:03.000Z INFO upload request started file=hero-02.png
+2026-08-02T18:58:04.000Z WARN memory heapUsed=487 MB heapLimit=512 MB rss=531 MB
+2026-08-02T18:58:05.000Z INFO upload request started file=hero-03.png
+2026-08-02T18:58:06.000Z FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+ 1: 0xb80c10 node::Abort() [node]
+ 2: 0xa9684d node::FatalError(char const*, char const*) [node]
+ 3: 0xd1e7de v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, bool) [node]
+2026-08-02T18:58:06.200Z ERROR process terminated signal=SIGABRT exitCode=134

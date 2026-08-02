@@ -1,223 +1,282 @@
 # Ants
 
-> An evidence-driven, investigative-ant-inspired architecture for cloud operations, DevOps, SRE, security, and codebase analysis.
+> Evidence-driven, investigative-agent incident analysis for Node.js projects.
 
-[![Project Status](https://img.shields.io/badge/status-architecture%20specified-blue)](#project-status)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](CHANGELOG.md)
-[![Runtime](https://img.shields.io/badge/runtime-Node.js%2020%2B-339933?logo=nodedotjs&logoColor=white)](#development)
-[![Interface](https://img.shields.io/badge/interface-shell%20%2F%20CLI-4EAA25?logo=gnubash&logoColor=white)](#development)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](CHANGELOG.md)
+[![Runtime](https://img.shields.io/badge/Node.js-%3E%3D20-339933?logo=nodedotjs&logoColor=white)](package.json)
+[![Mode](https://img.shields.io/badge/operation-read--only-success)](docs/local-mvp.md)
 [![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
 
-**Ants** is a Node.js, shell-driven project by [Artixcore](https://artixcore.com), created by [Ismam Tabriz Shams](https://artixcore.com/founder).
+**Ants** is a source-available Node.js project by [Artixcore](https://artixcore.com), created by [Ismam Tabriz Shams](https://artixcore.com/founder).
 
-Ants is designed as a colony of bounded specialist agents. Scouts explore, investigators follow promising evidence, validators challenge important hypotheses, and reporters produce traceable conclusions. Shared truth lives in structured evidence and an investigation graph, not in endless agent chat.
+It investigates a technical failure like a disciplined colony of scout, investigator, validator, and reporter agents. Instead of asking one model to guess, Ants collects bounded evidence, records provenance, ranks competing explanations, challenges the leading hypothesis, and writes an auditable report.
 
-## Project status
+## Phase 3 is working
 
-- **Phase 1, repository foundation:** complete
-- **Phase 2, architecture specification:** complete
-- **Current version:** `0.2.0`
-- **Next milestone:** Phase 3 local incident-investigation MVP
-- **Autonomy default:** read-only
+Version `0.3.0` includes a runnable **Local Incident-Investigation MVP** for Node.js services.
 
-The repository now contains a runnable CLI foundation, tests, continuous integration, normative architecture documentation, machine-readable JSON Schemas, example mission records, and Architecture Decision Records.
+It can currently:
 
-The actual multi-agent investigation engine is **not yet implemented**. Do not treat this version as a production DevOps operator or cloud remediation system.
+- validate a strict read-only mission;
+- inspect scoped local files without following symlinks or escaping the workspace;
+- analyze logs, runtime diagnostics, JavaScript or TypeScript source, `package.json`, Git history, and the latest Git diff;
+- detect Node.js heap exhaustion, port conflicts, disk exhaustion, missing modules, and unhandled errors;
+- create immutable evidence records with hashes, provenance, integrity, sensitivity, and independence groups;
+- construct and persist an investigation graph;
+- rank hypotheses with deterministic confidence factors and contradiction penalties;
+- independently validate hypotheses across multiple evidence sources;
+- redact secret-like values and pause deeper investigation when policy requires it;
+- enforce task, tool-call, duration, and byte-read budgets;
+- write Markdown and JSON reports, evidence JSONL, hypotheses, graph data, and a tool audit trail.
 
-## Why investigative ants?
+Ants does **not** remediate systems in Phase 3. It does not contact cloud services, execute arbitrary shell strings, call hosted language models, or modify in-scope evidence files.
 
-Real scout ants explore independently and reinforce useful trails. Ants applies that pattern to technical investigation:
-
-1. A mission defines the objective, scope, permissions, budgets, and stop conditions.
-2. Scout agents inspect logs, metrics, code, Git history, deployments, databases, and cloud configuration within strict boundaries.
-3. Tool output becomes immutable evidence with provenance and integrity metadata.
-4. Findings and hypotheses cite evidence instead of relying on model confidence alone.
-5. Promising investigation paths receive dynamic pheromone priority.
-6. Validator agents attempt to reproduce, refute, or qualify material hypotheses independently.
-7. A report exposes support, contradictions, uncertainty, missing evidence, and recommended next steps.
-8. Any future operational action remains separated from investigation and subject to deterministic policy and exact approval.
-
-## Architectural principles
-
-Ants follows several non-negotiable rules:
-
-- **Evidence before conclusions:** material claims cite evidence records.
-- **Read-only by default:** missing permission means denial.
-- **Structured coordination:** agents communicate through records and events, not unrestricted peer chat.
-- **Independent validation:** repeated use of one source is not multiple confirmation.
-- **Least privilege:** agents receive only task-specific context and tools.
-- **Provider neutrality:** model and cloud providers sit behind adapters.
-- **Auditability:** missions, tasks, tool calls, provider calls, evidence, approvals, and actions produce traceable events.
-- **Human control:** high-impact actions cannot be authorized by model-generated text.
-
-## Architecture specification
-
-Phase 2 documentation is indexed in [`docs/README.md`](docs/README.md).
-
-| Specification | Purpose |
-| --- | --- |
-| [System architecture](docs/architecture.md) | Components, lifecycle, data flow, consistency, failure model, and deployment profiles |
-| [Agent roles](docs/agents.md) | Roles, permissions, leases, context boundaries, and validation independence |
-| [Mission contract](docs/mission.md) | Scope, modes, budgets, stop conditions, amendments, and completion |
-| [Evidence model](docs/evidence.md) | Provenance, integrity, confidence, contradiction, and pheromone scoring |
-| [Investigation graph](docs/investigation-graph.md) | Nodes, edges, timelines, source chains, and graph queries |
-| [Tool Gateway](docs/tools.md) | Risk classes, sandboxing, authorization, and idempotency |
-| [Provider adapters](docs/providers.md) | Model capabilities, routing, credentials, cost, and fallback |
-| [Security model](docs/security.md) | Threats, approval policy, secrets, audit, and security tests |
-| [Memory model](docs/memory.md) | Working, mission, historical, and static memory |
-| [Cloud architecture](docs/cloud.md) | Provider boundary, normalized cloud resources, identity, and AWS-first direction |
-| [Internal APIs](docs/api.md) | Commands, events, queries, errors, delivery, and versioning |
-| [Architecture decisions](docs/adr/README.md) | Accepted design decisions and consequences |
-
-## Machine-readable contracts
-
-The architecture is backed by JSON Schema Draft 2020-12 contracts:
-
-- [`schemas/mission.schema.json`](schemas/mission.schema.json)
-- [`schemas/evidence.schema.json`](schemas/evidence.schema.json)
-- [`schemas/hypothesis.schema.json`](schemas/hypothesis.schema.json)
-- [`schemas/tool-call.schema.json`](schemas/tool-call.schema.json)
-- [`schemas/agent-message.schema.json`](schemas/agent-message.schema.json)
-- [`schemas/provider-request.schema.json`](schemas/provider-request.schema.json)
-
-Example records are available under [`examples/`](examples/README.md).
-
-## Intended use cases
-
-Ants is intended to support permitted noncommercial projects such as:
-
-- investigating application crashes and service degradation;
-- correlating logs, metrics, code changes, and deployment history;
-- diagnosing CI/CD failures;
-- examining runtime CPU, memory, disk, process, and network evidence;
-- analysing database latency, locks, connections, and execution plans;
-- reviewing cloud reliability and security configuration;
-- identifying possible cloud-cost waste;
-- preparing evidence-backed remediation plans;
-- producing incident reports and postmortem material.
-
-## Planned agent roles
-
-| Role | Responsibility |
-| --- | --- |
-| Mission Controller | Owns mission lifecycle, decomposition, budgets, and stop conditions |
-| Scout | Performs broad, low-cost discovery within scope |
-| Investigator | Performs focused analysis on promising evidence paths |
-| Validator | Independently challenges or reproduces material hypotheses |
-| Security Guard | Detects unsafe content, secret exposure, and policy violations |
-| Remediation Planner | Produces reversible proposed actions without execution |
-| Executor | Performs exactly approved actions in a future controlled-action phase |
-| Reporter | Produces evidence-backed human and machine-readable reports |
-
-Domain profiles may specialize these roles for code, logs, runtime, databases, CI, cloud, security, and cost.
-
-## Planned investigation flow
-
-```text
-Mission
-  -> Validation and Policy
-  -> Mission Controller
-  -> Scout Tasks
-  -> Evidence Store and Investigation Graph
-  -> Focused Investigator Tasks
-  -> Independent Validation
-  -> Ranked Hypotheses
-  -> Report
-  -> Human Decision
-```
-
-Operational execution is deliberately outside the read-only Phase 3 boundary.
-
-## Development
+## Quick start
 
 Requirements:
 
 - Node.js 20 or newer
-- npm
-
-Clone and validate the current foundation:
+- Git, for Git-history analysis and the bundled demo
 
 ```bash
 git clone https://github.com/Artixcore/ants.git
 cd ants
 npm ci
 npm run check
-node ./src/cli.js --help
+npm run demo
 ```
 
-Current CLI capabilities are limited to project help and version reporting.
+The demo creates a temporary two-commit Node.js service, investigates a deterministic out-of-memory crash, and prints the generated report directory.
+
+Expected leading conclusion:
+
+```text
+The Node.js process crashed because upload processing exhausted the
+JavaScript heap through full-file buffering, copying, or retained buffers.
+```
+
+## CLI
+
+### Validate a mission
 
 ```bash
-node ./src/cli.js --version
-# 0.2.0
+node src/cli.js validate ./mission.json
 ```
 
-## Phase 3 target
+### Investigate a local workspace
 
-The next implementation milestone is a local, read-only investigator that explains why a Node.js service failed using:
+```bash
+node src/cli.js investigate ./mission.json \
+  --workspace ./service \
+  --output ./report
+```
 
-- local application and system logs;
-- system and process metadata;
-- source code;
-- package metadata;
-- Git history;
-- deterministic sample incidents.
+### Run the bundled incident
 
-It will produce structured evidence, ranked hypotheses, contradictions, validation outcomes, and Markdown plus JSON reports.
+```bash
+npm run demo
+```
 
-See [`ROADMAP.md`](ROADMAP.md) for the full plan.
+### Show version or help
 
-## Safety principles
+```bash
+node src/cli.js --version
+node src/cli.js --help
+```
 
-Cloud and DevOps automation can cause outage, data loss, exposure, and unexpected cost. Any Ants implementation must:
+## Investigation flow
 
-1. use read-only credentials by default;
-2. avoid root and unrestricted cloud identities;
-3. keep secrets out of prompts, logs, and evidence records;
-4. route external access through the Tool Gateway;
-5. treat files, logs, issues, webpages, and resource names as untrusted data;
-6. require exact policy authorization for every action;
-7. prefer reversible actions with rollback plans;
-8. preserve provenance and audit events;
-9. disclose contradictions and missing evidence;
-10. test in local or staging environments before production use.
+```text
+Mission JSON
+    |
+    v
+Mission validation and budgets
+    |
+    v
+Scoped Tool Gateway
+    |
+    v
+Scout
+  logs + runtime + source + Git
+    |
+    v
+Evidence Store and Investigation Graph
+    |
+    v
+Investigator
+  competing root-cause hypotheses
+    |
+    v
+Validator
+  independent cross-source challenge
+    |
+    v
+Reporter
+  Markdown + JSON + audit artifacts
+```
+
+The MVP uses deterministic engineering rules rather than a hosted AI provider. This keeps the first implementation reproducible, inexpensive, private, and easy to test. Provider-neutral model adapters remain part of the architecture for later phases.
+
+## Mission format
+
+A mission defines:
+
+- objective;
+- local include and exclude scope;
+- read-only permissions;
+- task, time, tool-call, token, cost, and byte budgets;
+- confidence and validation stop conditions;
+- secret-detection behavior;
+- report format.
+
+See:
+
+- [`examples/incidents/node-memory-crash/mission.json`](examples/incidents/node-memory-crash/mission.json)
+- [`schemas/mission.schema.json`](schemas/mission.schema.json)
+- [`docs/mission.md`](docs/mission.md)
+
+Phase 3 accepts only:
+
+```text
+mode: read-only
+environment: local
+```
+
+Write, execute, and delete permissions are rejected.
+
+## Report artifacts
+
+A normal run writes:
+
+```text
+report/
+├── report.md
+├── report.json
+├── evidence.jsonl
+├── hypotheses.json
+├── graph.json
+└── audit.json
+```
+
+The report explains:
+
+- the leading root-cause hypothesis;
+- confidence and its contributing factors;
+- supporting evidence;
+- independent evidence groups;
+- contradictions;
+- validator outcome;
+- corrective recommendations;
+- known limitations;
+- task and budget usage;
+- every local tool call.
+
+Confidence values are deterministic engineering heuristics, not statistical probabilities.
+
+## Safety model
+
+Ants follows old, proven operational discipline: inspect first, preserve evidence, show your work, and never cut before measuring twice.
+
+The Phase 3 safety rules are:
+
+1. Only local, read-only missions are accepted.
+2. Canonical paths must remain inside the configured workspace.
+3. Symlinks, device files, `.env`, `.git` internals, `node_modules`, and generated `.ants` output are denied by default.
+4. Git commands use fixed argument arrays with prompting disabled.
+5. No general-purpose shell tool exists.
+6. Secret-like content is redacted before evidence storage.
+7. A configured secret-detection policy pauses deeper analysis.
+8. Every tool call is auditable.
+9. Budget exhaustion produces a partial report rather than silent failure when reporting remains possible.
+10. No remediation or production mutation is performed.
+
+Read the complete implementation notes in [`docs/local-mvp.md`](docs/local-mvp.md).
+
+## Architecture
+
+The Phase 2 architecture remains normative for the system design:
+
+- [`docs/architecture.md`](docs/architecture.md)
+- [`docs/agents.md`](docs/agents.md)
+- [`docs/mission.md`](docs/mission.md)
+- [`docs/evidence.md`](docs/evidence.md)
+- [`docs/investigation-graph.md`](docs/investigation-graph.md)
+- [`docs/tools.md`](docs/tools.md)
+- [`docs/providers.md`](docs/providers.md)
+- [`docs/security.md`](docs/security.md)
+- [`docs/api.md`](docs/api.md)
+
+Machine-readable contracts live in [`schemas/`](schemas/README.md).
+
+## Project structure
+
+```text
+src/
+├── agents/       Scout, Investigator, Validator, Reporter
+├── analysis/     Deterministic source signals
+├── core/         Mission, budgets, scheduler, IDs, errors
+├── demo/         Reproducible demo workspace builder
+├── security/     Path policy and redaction
+├── store/        Evidence and graph persistence
+├── tools/        Filesystem, Git, logs, runtime, gateway
+├── controller.js
+├── index.js
+└── cli.js
+```
+
+## Current limitations
+
+- The detector set is intentionally narrow.
+- Git evidence requires an isolated `.git` directory inside the selected workspace.
+- Ants does not attach to a live process or capture heap profiles.
+- It does not parse arbitrary binary logs.
+- It does not yet inspect GitHub Actions, remote repositories, or cloud telemetry.
+- It proposes fixes but does not apply them.
+- The MVP is not a substitute for an experienced incident commander or security responder.
+
+## Roadmap
+
+- Phase 1: repository foundation, complete
+- Phase 2: architecture specification, complete
+- Phase 3: local incident-investigation MVP, complete
+- Phase 4: repository and CI integrations, next
+- Phase 5: cloud observability integrations
+- Phase 6: controlled remediation with explicit approval
+
+See [`ROADMAP.md`](ROADMAP.md).
 
 ## Contributing
 
-Contributions, tests, documentation improvements, and permitted noncommercial integrations are welcome.
-
-Read:
+Contributions are welcome for permitted noncommercial purposes. Read:
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
 - [`SECURITY.md`](SECURITY.md)
 
-Architecture changes should include or update an Architecture Decision Record when they alter a foundational choice.
+Keep changes focused, testable, evidence-driven, and safe by default.
 
-## Source-available noncommercial use
+## License and commercial use
 
-Ants is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE). Because commercial use is restricted, Ants is not Open Source Initiative-approved open-source software.
+Ants is **source-available**, not OSI-approved open-source software, because commercial use is restricted.
 
-Permitted use generally includes personal study, hobby projects, noncommercial research, education, public-interest work, and qualifying nonprofit or government use under the license terms.
+It is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). Permitted noncommercial users may study, use, modify, and redistribute it under those terms.
 
-Without a separate written commercial license from Artixcore, you may not:
+Without a separate written license from Artixcore, you may not:
 
 - sell or resell Ants;
-- charge others for access to Ants;
-- offer it as a paid SaaS, hosted service, managed service, or consulting deliverable;
-- include it in a commercial product or paid package;
+- offer it as paid SaaS or hosted access;
+- include it in a commercial product;
+- provide it as a paid managed service or consulting deliverable;
 - use it primarily for commercial advantage;
 - remove required copyright, authorship, or license notices.
 
-Commercial licensing and partnership requests should be directed to [Artixcore](https://artixcore.com).
+Commercial licensing and partnerships should be discussed with [Artixcore](https://artixcore.com).
 
-## Support the project
-
-Voluntary donations may support Ants and Artixcore's other source-available projects.
+## Support Artixcore open projects
 
 ### Bitcoin
 
-Network: **Bitcoin Taproot**
+Network: Bitcoin Taproot
 
 ```text
 bc1pxmzqnz5f5rnugar4alrts3as56l2s2wg8x0mrxnk0y78xfm6xljszn8kkh
@@ -225,23 +284,17 @@ bc1pxmzqnz5f5rnugar4alrts3as56l2s2wg8x0mrxnk0y78xfm6xljszn8kkh
 
 ### Solana
 
-Network: **Solana**
+Network: Solana
 
 ```text
 9n1xJAT64NyUrVMExAENDJZqvsyfsg3JPbqaHND6D9Hi
 ```
 
-Always verify the network and address before sending. Cryptocurrency transactions are generally irreversible. Donations do not purchase ownership, service, influence, or expanded license rights.
+Always verify the network and address before sending. Cryptocurrency transactions are generally irreversible. Donations do not purchase ownership, service, commercial rights, or control of the project.
 
-## Author and ownership
+## Ownership
 
 - **Project:** Ants
 - **Organization:** [Artixcore](https://artixcore.com)
 - **Author:** [Ismam Tabriz Shams](https://artixcore.com/founder)
 - **Copyright:** Copyright 2026 Artixcore. All commercial rights reserved.
-
-## License
-
-Ants is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
-
-The project is provided **as is**, without warranties or guarantees. See the license for the controlling terms.

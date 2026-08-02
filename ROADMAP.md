@@ -1,6 +1,6 @@
 # Ants Roadmap
 
-The roadmap is directional, not a promise of delivery dates. Safety and verifiable behavior take priority over feature count.
+The roadmap is directional, not a promise of delivery dates. Safety, reproducibility, and defensible evidence take priority over feature count.
 
 ## Phase 1: Repository foundation
 
@@ -30,45 +30,58 @@ Status: **Complete**
 - Internal command, event, query, error, and versioning contracts
 - JSON Schema contracts and deterministic architecture fixtures
 - Architecture Decision Records
-- CI tests for Phase 2 documents, schemas, and examples
 
 ## Phase 3: Local incident-investigation MVP
 
-Status: **Next**
+Status: **Complete**
 
-Target mission: explain why a Node.js service failed using local logs, system metadata, source code, and Git history.
-
-- Mission parser and schema validation
-- Mission Controller
-- Task scheduler and bounded worker runs
+- Strict local read-only mission parser and validation
+- Mission Controller and bounded task scheduler
 - Scout, Investigator, Validator, and Reporter roles
-- Read-only filesystem, Git, log, and runtime tools
-- Structured evidence store
-- Investigation graph persistence
-- Ranked hypotheses with contradictions and confidence
-- Deterministic sample incident and evaluation suite
+- Scoped filesystem and Git Tool Gateway
+- Log, runtime, source, package, Git-log, and recent-diff collection
+- Secret redaction, canonical-path sandboxing, and symlink denial
+- Structured evidence store with provenance and hashes
+- Persistent investigation graph
+- Ranked hypotheses with independence and contradiction scoring
+- Deterministic cross-source validation
+- Budget-exhaustion partial reporting
 - Markdown and JSON reports
-- Read-only CLI workflow
+- Tool audit trail
+- Reproducible Node.js heap-exhaustion fixture
+- End-to-end CLI and safety tests
 
 ## Phase 4: Repository and CI integrations
 
-- GitHub repository inspection
+Status: **Next**
+
+Target mission: investigate a failing repository or CI run using a pinned Git ref and sanitized workflow artifacts.
+
+- GitHub repository adapter
+- Remote commit, pull-request, and issue metadata
+- GitHub Actions workflow, job, step, and log analysis
 - Commit and deployment correlation
-- GitHub Actions failure analysis
-- Pull-request and issue reporting
-- Secret-safe evidence collection
+- Repository dependency and test-failure evidence
+- Pull-request and issue report publishing in propose mode
+- Secret-safe artifact collection
+- Rate-limit and pagination policies
+- Evaluation fixtures for failed Node.js CI pipelines
 
 ## Phase 5: Cloud observability integrations
 
 - AWS CloudWatch-first read-only integration
-- Compute, database, load balancer, and deployment evidence
+- EC2, ECS, Lambda, RDS, load balancer, and deployment evidence
+- CloudTrail and IAM-context collection
 - Incident timelines and recommended remediations
 - Cost and security investigation modes
+- Provider-normalized cloud resource graph
 
 ## Phase 6: Controlled remediation
 
-- Policy engine and explicit action allowlists
-- Human approval workflow
+- Deterministic policy engine and action allowlists
+- Human approval workflow with bound approval tokens
 - Reversible low-risk actions
+- Proposed patches and pull requests
 - Rollback verification and post-action monitoring
-- Full audit trail
+- Full mutation audit trail
+- Explicit denial of destructive actions by default

@@ -8,6 +8,10 @@ node_modules/
 *.pem
 *.key
 
+# Ants generated reports
+.ants/
+.ants-reports/
+
 # Runtime output
 logs/
 *.log
@@ -21,7 +25,7 @@ coverage/
 .nyc_output/
 test-results/
 
-# Build and cache output
+# Build, cache, and temporary output
 dist/
 build/
 .cache/

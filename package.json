@@ -1,7 +1,7 @@
 {
   "name": "@artixcore/ants",
-  "version": "0.2.0",
-  "description": "An evidence-driven multi-agent architecture for cloud, DevOps, SRE, and codebase investigation.",
+  "version": "0.3.0",
+  "description": "A read-only local incident-investigation engine for Node.js services.",
   "private": true,
   "type": "module",
   "main": "./src/index.js",
@@ -12,9 +12,10 @@
   "scripts": {
     "start": "node ./src/cli.js",
     "dev": "node --watch ./src/cli.js",
-    "lint": "node --check ./src/index.js && node --check ./src/cli.js",
+    "lint": "node ./scripts/check-syntax.js",
     "test": "node --test",
-    "check": "npm run lint && npm test"
+    "check": "npm run lint && npm test",
+    "demo": "node ./src/cli.js demo"
   },
   "engines": {
     "node": ">=20.0.0"

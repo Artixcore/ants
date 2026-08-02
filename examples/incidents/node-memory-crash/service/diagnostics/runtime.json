@@ -1,0 +1,11 @@
+{
+  "nodeVersion": "20.15.1",
+  "platform": "linux",
+  "arch": "x64",
+  "heapUsedMb": 506,
+  "heapLimitMb": 512,
+  "rssMb": 552,
+  "exitCode": 134,
+  "signal": "SIGABRT",
+  "capturedAt": "2026-08-02T18:58:06.100Z"
+}

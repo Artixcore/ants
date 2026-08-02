@@ -1,35 +1,30 @@
-# Examples
+# Ants Examples
 
-Phase 2 includes deterministic contract examples for the planned local incident-investigation workflow.
+## Runnable incident
 
-## Available examples
+[`incidents/node-memory-crash/`](incidents/node-memory-crash/) is the Phase 3 deterministic end-to-end fixture.
 
-### Mission
+Run it with:
 
-[`missions/node-service-failure.json`](missions/node-service-failure.json)
+```bash
+npm run demo
+```
 
-A read-only mission that investigates a local Node.js service crash using logs, source code, package metadata, and Git history. It demonstrates scope, exclusions, permissions, budgets, stop conditions, reporting, sensitivity, and provider preferences.
+The demo:
 
-### Evidence
+1. copies a small Node.js service into a temporary workspace;
+2. creates a baseline streaming-upload commit;
+3. creates a regression commit that buffers and retains uploads;
+4. supplies failure logs and runtime diagnostics;
+5. runs the full Scout, Investigator, Validator, and Reporter workflow;
+6. writes Markdown and JSON investigation artifacts.
 
-[`evidence/memory-series.json`](evidence/memory-series.json)
+## Contract examples
 
-A runtime memory-series evidence record with source provenance, collector metadata, integrity state, content hash, sensitivity, independence group, reliability rationale, and redaction metadata.
+- [`missions/node-service-failure.json`](missions/node-service-failure.json)
+- [`evidence/memory-series.json`](evidence/memory-series.json)
+- [`hypotheses/image-buffer-growth.json`](hypotheses/image-buffer-growth.json)
 
-### Hypothesis
+These illustrate Phase 2 data contracts and are not a substitute for the runnable incident fixture.
 
-[`hypotheses/image-buffer-growth.json`](hypotheses/image-buffer-growth.json)
-
-A supported hypothesis that cites multiple evidence records and an independent reproduction validation. It demonstrates confidence factors, falsification criteria, missing evidence, alternatives, and affected entities.
-
-## Phase 3 examples
-
-Executable incident fixtures will be added with the Phase 3 local investigator. Each executable example must include:
-
-- a self-contained mission;
-- sanitized input data;
-- expected evidence and hypothesis output;
-- commands required to run it;
-- expected limitations and failure cases.
-
-Do not commit real customer logs, credentials, access tokens, private repository content, or sensitive infrastructure identifiers.
+Never commit real customer logs, credentials, tokens, private repository content, or sensitive infrastructure identifiers.

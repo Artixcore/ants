@@ -2,48 +2,58 @@
 
 All notable project changes are documented here.
 
-The project follows semantic versioning for architecture and implementation milestones.
+The project follows semantic versioning for public project milestones.
 
 ## [Unreleased]
 
 ### Planned
 
-- Phase 3 local incident-investigation MVP.
+- Phase 4 repository and CI integrations.
+
+## [0.3.0] - 2026-08-03
+
+### Added
+
+- Runnable local Node.js incident-investigation engine.
+- Strict read-only mission validation.
+- Mission Controller and bounded task scheduler.
+- Scout, Investigator, Validator, and Reporter agents.
+- Scoped filesystem and fixed-command Git tools behind a Tool Gateway.
+- Canonical-path checks, symlink denial, default secret-path exclusions, and content redaction.
+- Log, runtime, source, package, Git-history, and recent-diff evidence collection.
+- Immutable evidence records with hashes, provenance, integrity, sensitivity, and independence groups.
+- Persistent investigation graph.
+- Deterministic root-cause detectors for heap exhaustion, port conflicts, disk exhaustion, missing modules, and unhandled errors.
+- Cross-source hypothesis validation and contradiction-aware confidence scoring.
+- Markdown and JSON reports, evidence JSONL, hypotheses, graph, and audit output.
+- Partial reporting after bounded execution failures.
+- Secret-detection pause behavior.
+- Deterministic Node.js memory-crash demo with generated Git history.
+- Phase 3 implementation and safety documentation.
+- End-to-end, CLI, mission, sandbox, redaction, pause, budget, and smoke tests.
+
+### Changed
+
+- Project version increased to `0.3.0`.
+- Project state changed to `local-investigation-mvp`.
+- Syntax validation now checks all JavaScript files in `src`, `scripts`, and `tests`.
+- README and roadmap now document the working MVP and Phase 4 as the next milestone.
 
 ## [0.2.0] - 2026-08-02
 
 ### Added
 
-- Normative system architecture and deployment profiles.
-- Agent role, permission, task-leasing, and context contracts.
-- Mission lifecycle, scope, budget, stop-condition, and amendment specification.
-- Evidence, provenance, integrity, sensitivity, contradiction, confidence, and pheromone models.
-- Investigation Graph node, edge, temporal, and independence design.
-- Tool Gateway, sandbox, risk-class, authorization, and idempotency specification.
-- Provider-neutral model adapter and cloud-provider boundary.
-- Working, mission, historical, and static memory model.
-- Security threat model, approval matrix, secrets policy, and audit requirements.
-- Internal commands, events, queries, error codes, and versioning rules.
-- JSON Schema contracts for missions, evidence, hypotheses, tool calls, agent messages, and provider requests.
-- Architecture Decision Records.
-- Deterministic example mission, evidence, and hypothesis records.
-- Architecture contract tests integrated with the existing test suite.
-
-### Changed
-
-- Updated project version and CLI to `0.2.0`.
-- Marked Phase 2 complete and Phase 3 as the next milestone.
-- Updated the public README and documentation index.
+- Phase 2 architecture specification.
+- Mission, evidence, hypothesis, tool-call, agent-message, and provider-request schemas.
+- Architecture Decision Records and deterministic contract fixtures.
+- Architecture contract tests.
 
 ## [0.1.0] - 2026-08-02
 
 ### Added
 
-- Initial Artixcore project identity and documentation.
-- PolyForm Noncommercial 1.0.0 license and commercial-use restrictions.
-- Node.js package metadata and private-package safeguard.
-- Minimal shell/CLI entry point.
-- Project metadata module and smoke tests.
-- Contribution, conduct, security, and roadmap documents.
-- GitHub issue templates, pull-request template, and CI workflow.
 - Phase 1 repository foundation.
+- Artixcore project identity and documentation.
+- PolyForm Noncommercial 1.0.0 license.
+- Node.js package and CLI scaffolding.
+- Contribution, conduct, security, roadmap, issue, pull-request, and CI files.

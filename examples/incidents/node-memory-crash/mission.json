@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0.0",
+  "missionId": "mis_01JLOCALNODEFAILURE",
+  "title": "Investigate local Node.js upload crash",
+  "objective": "Determine the most likely cause of the service crash using local logs, runtime metadata, source code, and Git history.",
+  "mode": "read-only",
+  "scope": {
+    "environment": "local",
+    "include": [
+      "logs/**",
+      "src/**",
+      "diagnostics/**",
+      "package.json"
+    ],
+    "exclude": [
+      ".env",
+      ".env.*",
+      "node_modules/**",
+      ".ants/**"
+    ]
+  },
+  "permissions": [
+    {
+      "resourceType": "filesystem",
+      "operation": "read",
+      "scope": "**"
+    },
+    {
+      "resourceType": "git",
+      "operation": "read",
+      "scope": "."
+    }
+  ],
+  "budgets": {
+    "durationSeconds": 120,
+    "maxTasks": 10,
+    "maxTaskDepth": 4,
+    "maxToolCalls": 200,
+    "maxModelTokens": 0,
+    "maxEstimatedCostUsd": 0,
+    "maxBytesRead": 10485760,
+    "maxRetriesPerTask": 1
+  },
+  "stopConditions": {
+    "minimumConfidence": 0.75,
+    "requiredIndependentValidations": 1,
+    "maxNoProgressTasks": 3,
+    "completeWhenDefensible": true,
+    "pauseOnSecretDetection": true
+  },
+  "reporting": {
+    "format": "markdown+json",
+    "includeEvidenceIndex": true,
+    "includeContradictions": true,
+    "includeLimitations": true
+  },
+  "requestedBy": {
+    "type": "test",
+    "id": "phase-3-demo"
+  },
+  "knownFacts": [
+    "The process exited during concurrent image upload traffic."
+  ],
+  "sensitivity": "internal",
+  "retentionDays": 7,
+  "createdAt": "2026-08-03T00:00:00Z"
+}
