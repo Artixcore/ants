@@ -2,7 +2,7 @@
 
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { getProjectInfo, investigateLocal, loadMission, createDemoWorkspace } from './index.js';
+import { getProjectInfo, investigateLocal, loadMission, createDemoWorkspace, writeStarterMission } from './index.js';
 import { serializeError } from './core/safe-error.js';
 import { sanitizeText } from './security/redaction.js';
 
@@ -11,17 +11,24 @@ const HELP = `Ants v0.3.1
 Read-only local incident investigation by Artixcore.
 
 Usage:
-  ants investigate <mission.json> --workspace <path> [--output .ants/<path>]
+  ants init [mission.json]
   ants validate <mission.json>
+  ants investigate <mission.json> --workspace <path> [--output .ants/<path>]
   ants demo [--output .ants/<path>]
   ants --version
   ants --help
+
+First run:
+  ants init mission.json
+  ants validate mission.json
+  ants investigate mission.json --workspace .
 
 Examples:
   ants investigate ./mission.json --workspace ./service
   ants investigate ./mission.json --workspace ./service --output .ants/manual-run
   ants demo
 
+The repository already includes a valid starter mission.json.
 Report writes are restricted to the selected workspace's .ants directory.
 Ants performs no remediation and executes no arbitrary shell command.
 `;
@@ -39,6 +46,16 @@ export async function run(argv = process.argv.slice(2), io = console) {
   }
 
   const command = argv[0];
+  if (command === 'init') {
+    if (argv.length > 2) throw new Error('init accepts at most one mission JSON path.');
+    const missionPath = argv[1] ?? 'mission.json';
+    const created = await writeStarterMission(missionPath);
+    io.log(`Created mission: ${safeTerminal(created.filePath)}`);
+    io.log(`Mission ID: ${safeTerminal(created.mission.missionId)}`);
+    io.log(`Next: node src/cli.js validate ${safeTerminal(missionPath)}`);
+    return 0;
+  }
+
   if (command === 'validate') {
     if (argv.length !== 2) throw new Error('validate requires exactly one mission JSON path.');
     const loaded = await loadMission(argv[1]);
@@ -100,15 +117,28 @@ function safeTerminal(value) {
   return sanitizeText(value).replace(/[\r\n]+/g, ' ').slice(0, 4000);
 }
 
+function printCliError(error) {
+  const safe = serializeError(error);
+  const missingMission = safe.code === 'MISSION_VALIDATION_ERROR' && safe.details?.causeCode === 'ENOENT';
+
+  if (missingMission) {
+    console.error(`${safe.code}: Mission file not found.`);
+    console.error('Create one with: node src/cli.js init mission.json');
+    console.error('The Ants repository also includes a ready-to-validate ./mission.json file.');
+    return;
+  }
+
+  console.error(`${safe.code}: ${safe.message}`);
+  if (safe.details !== null) console.error(JSON.stringify(safe.details, null, 2));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   run()
     .then((exitCode) => {
       process.exitCode = exitCode;
     })
     .catch((error) => {
-      const safe = serializeError(error);
-      console.error(`${safe.code}: ${safe.message}`);
-      if (safe.details !== null) console.error(JSON.stringify(safe.details, null, 2));
+      printCliError(error);
       process.exitCode = 1;
     });
 }
