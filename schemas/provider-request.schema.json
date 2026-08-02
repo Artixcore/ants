@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Artixcore/ants/schemas/provider-request.schema.json",
+  "title": "Ants Provider Request",
+  "description": "Provider-neutral request sent through a model adapter.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "missionId",
+    "taskId",
+    "agentRunId",
+    "role",
+    "instructions",
+    "context",
+    "requiredCapabilities",
+    "maximumOutputTokens",
+    "timeoutMs",
+    "sensitivity",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "requestId": {
+      "type": "string",
+      "pattern": "^req_[A-Za-z0-9_-]{8,128}$"
+    },
+    "missionId": {
+      "type": "string",
+      "pattern": "^mis_[A-Za-z0-9_-]{8,128}$"
+    },
+    "taskId": {
+      "type": "string",
+      "pattern": "^task_[A-Za-z0-9_-]{8,128}$"
+    },
+    "agentRunId": {
+      "type": "string",
+      "pattern": "^run_[A-Za-z0-9_-]{8,128}$"
+    },
+    "role": {
+      "type": "string",
+      "enum": ["controller", "scout", "investigator", "validator", "security-guard", "remediation-planner", "executor", "reporter"]
+    },
+    "instructions": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000
+    },
+    "context": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "reference", "sensitivity"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "reference": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "sensitivity": {
+            "type": "string",
+            "enum": ["public", "internal", "confidential", "restricted"]
+          }
+        }
+      }
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["text", "structured-output", "tool-selection", "image-input", "file-input", "streaming", "deterministic-seed", "local-execution"]
+      }
+    },
+    "preferredCapabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["text", "structured-output", "tool-selection", "image-input", "file-input", "streaming", "deterministic-seed", "local-execution"]
+      }
+    },
+    "forbiddenCapabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      }
+    },
+    "outputSchemaRef": {
+      "type": "string",
+      "maxLength": 4096
+    },
+    "allowedToolIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 128
+      }
+    },
+    "maximumOutputTokens": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "timeoutMs": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600000
+    },
+    "determinism": {
+      "type": "string",
+      "enum": ["strict", "preferred", "not-required"]
+    },
+    "sensitivity": {
+      "type": "string",
+      "enum": ["public", "internal", "confidential", "restricted"]
+    },
+    "allowedProviders": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      }
+    },
+    "maximumEstimatedCostUsd": {
+      "type": "number",
+      "minimum": 0
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
