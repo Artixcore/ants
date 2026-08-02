@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0.0",
+  "hypothesisId": "hyp_01JMEMORYLEAK",
+  "missionId": "mis_01JLOCALNODEFAILURE",
+  "statement": "The service was terminated after the image-processing path caused sustained process memory growth.",
+  "status": "supported",
+  "proposedBy": {
+    "taskId": "task_01JCODECORRELATE",
+    "agentRunId": "run_01JCODECORRELATE"
+  },
+  "supportEvidenceIds": [
+    "ev_01JMEMORYSERIES",
+    "ev_01JOOMEVENT",
+    "ev_01JREPRODUCTION"
+  ],
+  "contradictionEvidenceIds": [],
+  "independenceGroups": [
+    "runtime-host-1",
+    "staging-reproduction-1"
+  ],
+  "confidence": {
+    "score": 0.91,
+    "rationale": "The original runtime series and an independent reproduction support the same causal chain.",
+    "factors": {
+      "evidenceStrength": 0.95,
+      "independence": 0.9,
+      "reproduction": 1,
+      "temporalRelevance": 0.95,
+      "coverage": 0.8,
+      "contradictionPenalty": 1
+    }
+  },
+  "predictedObservations": [
+    "Repeated image uploads should cause monotonic process memory growth in an isolated reproduction."
+  ],
+  "falsificationCriteria": [
+    "The same request sequence completes with stable memory after disabling the suspected image-processing path."
+  ],
+  "missingEvidence": [
+    "A heap snapshot from the original process was not available."
+  ],
+  "alternativeHypothesisIds": [
+    "hyp_01JNATIVELEAK"
+  ],
+  "validations": [
+    {
+      "validationId": "val_01JREPRODUCTION",
+      "agentRunId": "run_01JVALIDATOR",
+      "outcome": "supported",
+      "evidenceIds": [
+        "ev_01JREPRODUCTION"
+      ],
+      "independenceGroup": "staging-reproduction-1",
+      "rationale": "An isolated reproduction showed memory growth only when the suspected path was enabled.",
+      "completedAt": "2026-08-02T19:14:00Z"
+    }
+  ],
+  "affectedEntityIds": [
+    "entity-node-api",
+    "entity-image-processor"
+  ],
+  "createdAt": "2026-08-02T19:05:00Z",
+  "updatedAt": "2026-08-02T19:14:00Z"
+}
