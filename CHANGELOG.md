@@ -6,6 +6,17 @@ The project follows semantic versioning for public project milestones.
 
 ## [Unreleased]
 
+### Added
+
+- Safe `ants init [mission.json]` command for creating a valid starter mission in the current project.
+- Valid root `mission.json` so the documented validation command works immediately after cloning.
+- First-run and missing-file regression tests.
+
+### Fixed
+
+- Missing mission files now produce an actionable creation instruction instead of only exposing `ENOENT` details.
+- README and local-MVP documentation now explain how to create, validate, and run missions from Git Bash and PowerShell.
+
 ### Planned
 
 - Phase 4 repository and CI integrations.
