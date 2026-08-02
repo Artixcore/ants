@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { open, realpath } from 'node:fs/promises';
+import { open, realpath, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { AntsError } from './errors.js';
 
@@ -81,12 +81,22 @@ export async function writeStarterMission(filePath = DEFAULT_MISSION_FILE, { cwd
   const target = await resolveSafeTarget(filePath, cwd);
   const mission = createStarterMission({ now, missionId });
   let handle;
+  let created = false;
 
   try {
     handle = await open(target, 'wx', 0o600);
+    created = true;
     await handle.writeFile(`${JSON.stringify(mission, null, 2)}\n`, 'utf8');
     await handle.sync();
+    await handle.close();
+    handle = null;
   } catch (error) {
+    if (handle) {
+      await handle.close().catch(() => {});
+      handle = null;
+    }
+    if (created) await unlink(target).catch(() => {});
+
     if (error.code === 'EEXIST') {
       throw new AntsError('Mission file already exists. Refusing to overwrite it.', {
         code: 'MISSION_INIT_ERROR',
