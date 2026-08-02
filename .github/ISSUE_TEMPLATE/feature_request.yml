@@ -1,0 +1,41 @@
+name: Feature request
+description: Propose a focused capability or improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the operational or developer problem, not only the desired implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain inputs, outputs, permissions, and expected user flow.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or example
+      description: Provide a sanitized incident, workflow, or example showing why this matters.
+  - type: textarea
+    id: risks
+    attributes:
+      label: Safety and failure risks
+      description: Note destructive actions, cloud cost, credential scope, privacy, or incorrect-conclusion risks.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope checks
+      options:
+        - label: This request fits the noncommercial project license.
+          required: true
+        - label: I searched existing issues and the roadmap.
+          required: true
