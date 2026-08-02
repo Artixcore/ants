@@ -15,23 +15,39 @@ Status: **Complete**
 
 ## Phase 2: Architecture specification
 
-- Mission schema and lifecycle
-- Agent role and permission model
-- Evidence, hypothesis, and confidence schemas
-- Investigation graph design
-- Tool contracts and sandbox boundaries
-- Provider-neutral model adapter
-- Threat model and approval policy
+Status: **Complete**
+
+- Mission schema, modes, budgets, scope, stop conditions, amendments, and lifecycle
+- Agent roles, permissions, task leasing, context minimization, and independence rules
+- Evidence, provenance, integrity, sensitivity, contradiction, and confidence models
+- Hypothesis lifecycle and validation outcomes
+- Investigation graph nodes, edges, temporal model, and pheromone projection
+- Tool Gateway contracts, risk classes, sandbox boundaries, and idempotency
+- Provider-neutral model adapter and capability routing
+- Cloud-provider adapter boundary and normalized resource model
+- Working, mission, historical, and static memory rules
+- Threat model, approval matrix, secrets policy, and audit controls
+- Internal command, event, query, error, and versioning contracts
+- JSON Schema contracts and deterministic architecture fixtures
+- Architecture Decision Records
+- CI tests for Phase 2 documents, schemas, and examples
 
 ## Phase 3: Local incident-investigation MVP
 
+Status: **Next**
+
 Target mission: explain why a Node.js service failed using local logs, system metadata, source code, and Git history.
 
+- Mission parser and schema validation
 - Mission Controller
+- Task scheduler and bounded worker runs
 - Scout, Investigator, Validator, and Reporter roles
+- Read-only filesystem, Git, log, and runtime tools
 - Structured evidence store
+- Investigation graph persistence
 - Ranked hypotheses with contradictions and confidence
 - Deterministic sample incident and evaluation suite
+- Markdown and JSON reports
 - Read-only CLI workflow
 
 ## Phase 4: Repository and CI integrations
