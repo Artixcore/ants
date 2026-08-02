@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
 import { createDemoWorkspace } from '../src/demo/create-demo-workspace.js';
 
-test('CLI validates a mission', () => {
-  const result = spawnSync(process.execPath, ['src/cli.js', 'validate', 'examples/incidents/node-memory-crash/mission.json'], {
+const CLI_PATH = path.resolve('src/cli.js');
+
+test('CLI validates the bundled starter mission', () => {
+  const result = spawnSync(process.execPath, [CLI_PATH, 'validate', 'mission.json'], {
     cwd: process.cwd(),
     encoding: 'utf8'
   });
@@ -14,10 +18,61 @@ test('CLI validates a mission', () => {
   assert.match(result.stdout, /Valid mission/);
 });
 
+test('CLI initializes and validates a mission in a project directory', async () => {
+  const project = await mkdtemp(path.join(tmpdir(), 'ants-cli-init-'));
+  const initialized = spawnSync(process.execPath, [CLI_PATH, 'init', 'mission.json'], {
+    cwd: project,
+    encoding: 'utf8'
+  });
+
+  assert.equal(initialized.status, 0, initialized.stderr);
+  assert.match(initialized.stdout, /Created mission/);
+
+  const mission = JSON.parse(await readFile(path.join(project, 'mission.json'), 'utf8'));
+  assert.equal(mission.mode, 'read-only');
+  assert.equal(mission.scope.environment, 'local');
+
+  const validated = spawnSync(process.execPath, [CLI_PATH, 'validate', 'mission.json'], {
+    cwd: project,
+    encoding: 'utf8'
+  });
+
+  assert.equal(validated.status, 0, validated.stderr);
+  assert.match(validated.stdout, /Valid mission/);
+});
+
+test('CLI refuses to overwrite an existing mission', async () => {
+  const project = await mkdtemp(path.join(tmpdir(), 'ants-cli-existing-'));
+  const first = spawnSync(process.execPath, [CLI_PATH, 'init', 'mission.json'], {
+    cwd: project,
+    encoding: 'utf8'
+  });
+  const second = spawnSync(process.execPath, [CLI_PATH, 'init', 'mission.json'], {
+    cwd: project,
+    encoding: 'utf8'
+  });
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 1);
+  assert.match(second.stderr, /Refusing to overwrite/);
+});
+
+test('CLI gives an actionable error when a mission file is missing', async () => {
+  const project = await mkdtemp(path.join(tmpdir(), 'ants-cli-missing-'));
+  const result = spawnSync(process.execPath, [CLI_PATH, 'validate', 'mission.json'], {
+    cwd: project,
+    encoding: 'utf8'
+  });
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Mission file not found/);
+  assert.match(result.stderr, /init mission\.json/);
+});
+
 test('CLI investigates a prepared local workspace', async () => {
   const demo = await createDemoWorkspace();
   const result = spawnSync(process.execPath, [
-    'src/cli.js',
+    CLI_PATH,
     'investigate',
     demo.missionPath,
     '--workspace',
