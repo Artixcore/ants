@@ -1,0 +1,44 @@
+{
+  "name": "@artixcore/ants",
+  "version": "0.1.0",
+  "description": "An investigative multi-agent foundation for cloud, DevOps, SRE, and codebase analysis.",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": "./src/index.js",
+  "bin": {
+    "ants": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node ./src/cli.js",
+    "dev": "node --watch ./src/cli.js",
+    "lint": "node --check ./src/index.js && node --check ./src/cli.js",
+    "test": "node --test",
+    "check": "npm run lint && npm test"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Artixcore/ants.git"
+  },
+  "homepage": "https://github.com/Artixcore/ants#readme",
+  "bugs": {
+    "url": "https://github.com/Artixcore/ants/issues"
+  },
+  "author": {
+    "name": "Ismam Tabriz Shams",
+    "url": "https://artixcore.com/founder"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": [
+    "ai-agents",
+    "cloud",
+    "devops",
+    "incident-response",
+    "multi-agent",
+    "nodejs",
+    "sre"
+  ]
+}
