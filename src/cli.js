@@ -2,15 +2,21 @@
 
 import { getProjectInfo } from './index.js';
 
-const HELP = `Ants v0.1.0
+const HELP = `Ants v0.2.0
 
-Investigative multi-agent infrastructure by Artixcore.
+Evidence-driven multi-agent investigation architecture by Artixcore.
 
 Usage:
   ants --help       Show this help message
   ants --version    Print the current version
 
-The investigation engine is not implemented in Phase 1. Follow the roadmap at:
+Phase 2 architecture specifications and machine-readable contracts are complete.
+The local investigation engine is planned for Phase 3.
+
+Architecture:
+https://github.com/Artixcore/ants/blob/master/docs/architecture.md
+
+Roadmap:
 https://github.com/Artixcore/ants/blob/master/ROADMAP.md
 `;
 
