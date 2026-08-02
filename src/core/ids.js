@@ -1,8 +1,7 @@
 import { createHash } from 'node:crypto';
 
 export function stableHash(value) {
-  const serialized = typeof value === 'string' ? value : stableStringify(value);
-  return createHash('sha256').update(serialized).digest('hex');
+  return createHash('sha256').update(stableStringify(value)).digest('hex');
 }
 
 export function stableId(prefix, value, length = 20) {
@@ -10,16 +9,27 @@ export function stableId(prefix, value, length = 20) {
 }
 
 export function stableStringify(value) {
-  if (value === null || typeof value !== 'object') {
-    return JSON.stringify(value);
-  }
+  return serialize(value, new WeakSet());
+}
 
-  if (Array.isArray(value)) {
-    return `[${value.map((item) => stableStringify(item)).join(',')}]`;
-  }
+function serialize(value, seen) {
+  if (value === undefined) return '"[undefined]"';
+  if (value === null) return 'null';
+  if (typeof value === 'string' || typeof value === 'boolean') return JSON.stringify(value);
+  if (typeof value === 'number') return Number.isFinite(value) ? JSON.stringify(value) : JSON.stringify(String(value));
+  if (typeof value === 'bigint') return JSON.stringify(`${value}n`);
+  if (typeof value === 'symbol' || typeof value === 'function') return JSON.stringify(String(value));
+  if (value instanceof Date) return JSON.stringify(value.toISOString());
 
-  return `{${Object.keys(value)
-    .sort()
-    .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
-    .join(',')}}`;
+  if (seen.has(value)) throw new TypeError('Cannot create a stable hash for a cyclic value.');
+  seen.add(value);
+  try {
+    if (Array.isArray(value)) return `[${value.map((item) => serialize(item, seen)).join(',')}]`;
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${serialize(value[key], seen)}`)
+      .join(',')}}`;
+  } finally {
+    seen.delete(value);
+  }
 }

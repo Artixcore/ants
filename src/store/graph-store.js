@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { stableId } from '../core/ids.js';
+import { atomicWriteJson } from '../security/safe-write.js';
 
 export class InvestigationGraph {
   constructor({ missionId }) {
@@ -11,7 +11,8 @@ export class InvestigationGraph {
   }
 
   addNode(node) {
-    const normalized = Object.freeze({ ...node });
+    if (!node?.id || !node?.type) throw new TypeError('Graph nodes require id and type.');
+    const normalized = deepFreeze(structuredClone(node));
     this.nodes.set(node.id, normalized);
     return normalized;
   }
@@ -19,7 +20,7 @@ export class InvestigationGraph {
   addEdge({ from, to, type, metadata = {} }) {
     if (!this.nodes.has(from) || !this.nodes.has(to)) return null;
     const id = stableId('edge', { from, to, type, metadata });
-    const edge = Object.freeze({ id, from, to, type, metadata });
+    const edge = deepFreeze({ id, from, to, type, metadata: structuredClone(metadata) });
     this.edges.set(id, edge);
     return edge;
   }
@@ -46,12 +47,8 @@ export class InvestigationGraph {
       metadata: { status: hypothesis.status, confidence: hypothesis.confidence.score }
     });
     this.addEdge({ from: hypothesis.hypothesisId, to: this.missionId, type: 'investigates' });
-    for (const evidenceId of hypothesis.supportEvidenceIds) {
-      this.addEdge({ from: evidenceId, to: hypothesis.hypothesisId, type: 'supports' });
-    }
-    for (const evidenceId of hypothesis.contradictionEvidenceIds) {
-      this.addEdge({ from: evidenceId, to: hypothesis.hypothesisId, type: 'contradicts' });
-    }
+    for (const evidenceId of hypothesis.supportEvidenceIds) this.addEdge({ from: evidenceId, to: hypothesis.hypothesisId, type: 'supports' });
+    for (const evidenceId of hypothesis.contradictionEvidenceIds) this.addEdge({ from: evidenceId, to: hypothesis.hypothesisId, type: 'contradicts' });
   }
 
   updateHypothesis(hypothesis) {
@@ -73,7 +70,12 @@ export class InvestigationGraph {
   }
 
   async persist(outputDir) {
-    await mkdir(outputDir, { recursive: true });
-    await writeFile(path.join(outputDir, 'graph.json'), `${JSON.stringify(this.snapshot(), null, 2)}\n`, 'utf8');
+    await atomicWriteJson(path.join(outputDir, 'graph.json'), this.snapshot());
   }
+}
+
+function deepFreeze(value) {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  for (const child of Object.values(value)) deepFreeze(child);
+  return Object.freeze(value);
 }

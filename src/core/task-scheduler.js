@@ -8,11 +8,12 @@ export class TaskScheduler {
     this.tasks = [];
   }
 
-  async run(role, description, operation, { depth = 1 } = {}) {
-    if (Number.isFinite(this.budget.limits.maxTaskDepth) && depth > this.budget.limits.maxTaskDepth) {
+  async run(role, description, operation, { depth = 1, budgetExempt = false } = {}) {
+    if (!budgetExempt && Number.isFinite(this.budget.limits.maxTaskDepth) && depth > this.budget.limits.maxTaskDepth) {
       throw new Error(`Task depth ${depth} exceeds maxTaskDepth ${this.budget.limits.maxTaskDepth}.`);
     }
-    this.budget.consumeTask();
+    if (!budgetExempt) this.budget.consumeTask();
+
     const sequence = this.tasks.length + 1;
     const taskId = stableId('task', `${this.missionId}:${sequence}:${role}:${description}`);
     const agentRunId = stableId('run', `${taskId}:${role}`);
@@ -22,6 +23,7 @@ export class TaskScheduler {
       role,
       description,
       depth,
+      budgetExempt,
       status: 'running',
       startedAt: this.clock()
     };
@@ -33,12 +35,12 @@ export class TaskScheduler {
       task.completedAt = this.clock();
       task.outputSummary = result?.summary ?? null;
       task.progressMade = result?.progressMade !== false;
-      this.budget.markProgress(task.progressMade);
+      if (!budgetExempt) this.budget.markProgress(task.progressMade);
       return result;
     } catch (error) {
       task.status = 'failed';
       task.completedAt = this.clock();
-      task.error = { code: error.code ?? 'UNEXPECTED_ERROR', message: error.message };
+      task.error = { code: error.code ?? 'UNEXPECTED_ERROR', message: String(error.message ?? 'Unknown error') };
       throw error;
     }
   }

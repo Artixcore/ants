@@ -8,8 +8,8 @@ export class AntsError extends Error {
 }
 
 export class MissionValidationError extends AntsError {
-  constructor(message, details) {
-    super(message, { code: 'MISSION_VALIDATION_ERROR', details });
+  constructor(message, details, cause) {
+    super(message, { code: 'MISSION_VALIDATION_ERROR', details, cause });
   }
 }
 
@@ -20,13 +20,19 @@ export class BudgetExceededError extends AntsError {
 }
 
 export class SandboxViolationError extends AntsError {
-  constructor(message, details) {
-    super(message, { code: 'SANDBOX_VIOLATION', details });
+  constructor(message, details, cause) {
+    super(message, { code: 'SANDBOX_VIOLATION', details, cause });
   }
 }
 
 export class ToolExecutionError extends AntsError {
   constructor(message, details, cause) {
     super(message, { code: 'TOOL_EXECUTION_ERROR', details, cause });
+  }
+}
+
+export class OutputSafetyError extends AntsError {
+  constructor(message, details, cause) {
+    super(message, { code: 'OUTPUT_SAFETY_ERROR', details, cause });
   }
 }

@@ -10,6 +10,44 @@ The project follows semantic versioning for public project milestones.
 
 - Phase 4 repository and CI integrations.
 
+## [0.3.1] - 2026-08-03
+
+### Security
+
+- Prevented oversized files from being loaded fully into process memory before truncation.
+- Disabled repository-controlled Git external diff and text-conversion commands.
+- Isolated Git configuration, disabled prompts and pagers, and reduced inherited environment variables.
+- Restricted report output to the workspace `.ants` directory and rejected symlinked output paths.
+- Added exclusive temporary files and atomic artifact replacement.
+- Enforced permission scopes in the Tool Gateway and audited malformed or denied calls.
+- Expanded secret redaction and removed terminal control sequences from errors and tool output.
+
+### Fixed
+
+- Mission validation now returns structured validation errors instead of throwing incidental type errors for malformed arrays or objects.
+- Mission files are bounded to one MiB and symbolic-link mission paths are rejected.
+- Mission validation now rejects unknown fields, unsafe path patterns, invalid dates, fractional limits, invalid nested objects, and unsupported Git scopes.
+- Secret detection now respects `pauseOnSecretDetection: false` and continues only with redacted content.
+- Missions without Git permission no longer fail because the Scout attempted Git tools unconditionally.
+- Safety reporting can run after normal task or duration budgets are exhausted.
+- Stable hashing now handles `undefined` deterministically and rejects cyclic values clearly.
+- The demo now creates a unique workspace instead of risking reuse of an existing `service` directory.
+
+### Added
+
+- Output-path security policy.
+- Safe atomic artifact writer.
+- Safe error serialization.
+- Binary-file detection.
+- Adversarial tests for malicious Git diff drivers, output symlinks, traversal, oversized files, permission scopes, terminal controls, and malformed missions.
+- Dependabot configuration, code ownership, and CI dependency auditing.
+
+### Changed
+
+- Project version increased to `0.3.1`.
+- Project state changed to `local-investigation-mvp-hardened`.
+- README, security policy, contributing guide, code of conduct, and local-MVP documentation were revised.
+
 ## [0.3.0] - 2026-08-03
 
 ### Added

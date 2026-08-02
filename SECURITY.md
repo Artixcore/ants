@@ -1,26 +1,86 @@
 # Security Policy
 
-Ants is experimental and is not yet approved for autonomous production changes.
+Ants reads potentially hostile repositories, logs, and diagnostic artifacts. Security reports are taken seriously, but the project remains experimental and is not approved for autonomous production changes.
 
 ## Supported versions
 
-No release is currently considered production-ready. Security fixes will target the latest code on `master` until formal releases begin.
+| Version | Security support |
+| --- | --- |
+| `0.3.1` and current `master` | Supported |
+| `0.3.0` | Upgrade required |
+| `0.2.x` and older | Not supported |
+
+Security fixes target the newest release and `master`. Backports are not guaranteed.
 
 ## Reporting a vulnerability
 
-Do not open a public issue for vulnerabilities involving credential exposure, command injection, privilege escalation, cloud-account access, prompt injection, data deletion, or other immediately exploitable behavior.
+Do **not** open a public issue for a vulnerability involving command execution, path escape, credential exposure, arbitrary file writes, privilege escalation, denial of service, evidence tampering, or another immediately exploitable condition.
 
-Report the issue privately through an official contact listed on [artixcore.com](https://artixcore.com). Include the affected file or commit, safe reproduction steps, expected and observed behavior, potential impact, and suggested mitigation when known.
+Use one of these private routes:
 
-Never include live credentials, private keys, wallet seed phrases, customer data, or production secrets.
+1. GitHub's private vulnerability-reporting or security-advisory interface for this repository, when available.
+2. Email `ismam.ceo@artixcore.com` with the subject `Ants Security Report`.
 
-## Operational security rules
+Include:
 
-1. Read-only access unless a narrower write permission is explicitly approved.
-2. Least-privilege credentials with limited lifetime and scope.
-3. Human approval before production-changing actions.
-4. Explicit allowlists for commands and tools.
-5. Complete audit logs for evidence, tool calls, decisions, and changes.
-6. Treat logs, web pages, tickets, and repository text as untrusted data.
-7. Redact secrets and personal data before sending content to an AI provider.
-8. Prefer reversible actions with tested rollback procedures.
+- affected version, file, or commit;
+- a concise impact statement;
+- safe reproduction steps;
+- expected and observed behavior;
+- suggested mitigation, when known;
+- whether the issue is already being exploited.
+
+Never include live credentials, private keys, seed phrases, customer data, or production secrets. Use synthetic test values.
+
+## Response process
+
+Artixcore will aim to:
+
+1. acknowledge a complete report;
+2. reproduce and classify the issue;
+3. prepare a fix and regression test;
+4. coordinate disclosure when material risk exists;
+5. publish release notes after users have a reasonable upgrade path.
+
+Response times are best-effort because Ants is an early-stage project.
+
+## Phase 3 security boundaries
+
+The current implementation:
+
+- accepts local read-only missions only;
+- rejects absolute and parent-traversal scope patterns;
+- enforces mission and permission scopes;
+- canonicalizes workspace and file paths;
+- rejects symlinked workspace roots, evidence files, and report directories;
+- excludes common secret paths and private-key files by default;
+- caps file reads before memory allocation;
+- treats binary files as non-text evidence;
+- disables Git external diff and text-conversion commands;
+- isolates Git configuration and reduces inherited subprocess environment variables;
+- uses fixed Git argument arrays with prompting and pagers disabled;
+- redacts common credential formats and strips terminal control sequences;
+- restricts report writes to `<workspace>/.ants/`;
+- writes artifacts through exclusive temporary files and atomic replacement;
+- records tool attempts and normalized errors;
+- performs no remediation, network access, or arbitrary shell execution.
+
+## Security limitations
+
+- Pattern-based secret detection is not complete.
+- Deterministic source analysis may produce false positives and false negatives.
+- Git subprocesses are bounded by time and output, but they do not run inside a separate operating-system container.
+- A user who runs Ants with excessive operating-system privileges gives the process those same privileges.
+- Phase 3 does not verify signed commits, release signatures, or artifact provenance.
+- Hosted model providers and cloud credentials are not implemented in Phase 3.
+
+Run Ants as an unprivileged user against a copy or snapshot of important evidence whenever possible.
+
+## Dependency and supply-chain policy
+
+- Keep runtime dependencies minimal.
+- Commit and review lockfile changes.
+- Run `npm run security:audit` before release.
+- Review automated dependency updates before merging.
+- Do not add install scripts without explicit security review.
+- Changes to `src/security`, `src/tools`, workflows, permissions, or output handling require focused review and tests.

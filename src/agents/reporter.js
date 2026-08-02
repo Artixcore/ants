@@ -1,5 +1,5 @@
-import { mkdir, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { atomicWriteJson, atomicWriteText } from '../security/safe-write.js';
 
 export async function runReporter({
   context,
@@ -18,14 +18,12 @@ export async function runReporter({
   const primary = hypotheses[0] ?? null;
   const minimumConfidence = mission.stopConditions.minimumConfidence ?? 0.75;
   const status = forcedStatus ?? (
-    primary?.status === 'supported' && primary.confidence.score >= minimumConfidence
-      ? 'completed'
-      : 'partial'
+    primary?.status === 'supported' && primary.confidence.score >= minimumConfidence ? 'completed' : 'partial'
   );
   const limitations = buildLimitations({ mission, primary, evidenceStore, gateway, status });
   const report = {
     schemaVersion: '1.0.0',
-    engineVersion: '0.3.0',
+    engineVersion: '0.3.1',
     mission: {
       missionId: mission.missionId,
       title: mission.title,
@@ -35,6 +33,7 @@ export async function runReporter({
     },
     status,
     generatedAt: clock(),
+    outputDirectory: outputDir,
     summary: summaryFor(primary, status),
     primaryHypothesisId: primary?.hypothesisId ?? null,
     hypotheses,
@@ -53,22 +52,22 @@ export async function runReporter({
     safety: {
       readOnly: true,
       mutationsAttempted: 0,
-      secretDetected: evidenceStore.hasSecretDetection()
+      secretDetected: evidenceStore.hasSecretDetection(),
+      outputRestrictedToWorkspaceAnts: true
     }
   };
 
-  await mkdir(outputDir, { recursive: true });
   await evidenceStore.persist(outputDir);
   await graph.persist(outputDir);
-  await atomicJson(path.join(outputDir, 'hypotheses.json'), hypotheses);
+  await atomicWriteJson(path.join(outputDir, 'hypotheses.json'), hypotheses);
 
   if (['json', 'markdown+json'].includes(mission.reporting.format)) {
-    await atomicJson(path.join(outputDir, 'report.json'), report);
+    await atomicWriteJson(path.join(outputDir, 'report.json'), report);
   }
   if (['markdown', 'markdown+json'].includes(mission.reporting.format)) {
-    await atomicText(path.join(outputDir, 'report.md'), toMarkdown(report, mission));
+    await atomicWriteText(path.join(outputDir, 'report.md'), toMarkdown(report, mission));
   }
-  await atomicJson(path.join(outputDir, 'audit.json'), gateway.snapshot());
+  await atomicWriteJson(path.join(outputDir, 'audit.json'), gateway.snapshot());
 
   return {
     summary: `Wrote ${mission.reporting.format} investigation report to ${outputDir}.`,
@@ -105,7 +104,8 @@ function summaryFor(primary, status) {
 
 function buildLimitations({ mission, primary, evidenceStore, gateway, status }) {
   const limitations = [];
-  if (!gateway.git.available()) limitations.push('No isolated .git directory was present in the workspace, so Git history could not be inspected.');
+  if (!gateway.canCall('git.log')) limitations.push('The mission did not authorize Git inspection.');
+  else if (!gateway.git.available()) limitations.push('No isolated, non-symlink .git directory was present, so Git history could not be inspected.');
   if (!evidenceStore.find((record) => record.type === 'system').length) limitations.push('No structured runtime or system diagnostic artifact was collected.');
   if (!primary || primary.status !== 'supported') limitations.push('The leading hypothesis did not meet the configured support and confidence thresholds.');
   if (primary?.missingEvidence?.length) limitations.push(...primary.missingEvidence);
@@ -130,16 +130,16 @@ function evidenceIndexEntry(record) {
 function toMarkdown(report, mission) {
   const primary = report.hypotheses.find((item) => item.hypothesisId === report.primaryHypothesisId);
   const lines = [
-    `# Ants Incident Investigation`,
+    '# Ants Incident Investigation',
     '',
     `**Mission:** ${escapeMarkdown(mission.title)}`,
-    `**Mission ID:** \`${mission.missionId}\``,
-    `**Status:** ${report.status}`,
-    `**Generated:** ${report.generatedAt}`,
+    `**Mission ID:** \`${escapeCode(mission.missionId)}\``,
+    `**Status:** ${escapeMarkdown(report.status)}`,
+    `**Generated:** ${escapeMarkdown(report.generatedAt)}`,
     '',
     '## Executive summary',
     '',
-    report.summary,
+    escapeMarkdown(report.summary),
     ''
   ];
 
@@ -147,15 +147,15 @@ function toMarkdown(report, mission) {
     lines.push(
       '## Leading hypothesis',
       '',
-      primary.statement,
+      escapeMarkdown(primary.statement),
       '',
       `- **Confidence:** ${Math.round(primary.confidence.score * 100)}%`,
-      `- **Validation status:** ${primary.status}`,
+      `- **Validation status:** ${escapeMarkdown(primary.status)}`,
       `- **Independent evidence groups:** ${primary.independenceGroups.length}`,
       `- **Supporting evidence records:** ${primary.supportEvidenceIds.length}`,
       `- **Contradictions:** ${primary.contradictionEvidenceIds.length}`,
       '',
-      primary.confidence.rationale,
+      escapeMarkdown(primary.confidence.rationale),
       ''
     );
   }
@@ -163,51 +163,52 @@ function toMarkdown(report, mission) {
   lines.push('## Ranked hypotheses', '');
   for (const [index, hypothesis] of report.hypotheses.entries()) {
     lines.push(
-      `${index + 1}. **${Math.round(hypothesis.confidence.score * 100)}%** - ${hypothesis.statement}`,
-      `   - Status: ${hypothesis.status}`,
-      `   - Evidence: ${hypothesis.supportEvidenceIds.join(', ') || 'none'}`,
-      `   - Contradictions: ${hypothesis.contradictionEvidenceIds.join(', ') || 'none'}`
+      `${index + 1}. **${Math.round(hypothesis.confidence.score * 100)}%** - ${escapeMarkdown(hypothesis.statement)}`,
+      `   - Status: ${escapeMarkdown(hypothesis.status)}`,
+      `   - Evidence: ${hypothesis.supportEvidenceIds.map(escapeCode).join(', ') || 'none'}`
     );
+    if (mission.reporting.includeContradictions) {
+      lines.push(`   - Contradictions: ${hypothesis.contradictionEvidenceIds.map(escapeCode).join(', ') || 'none'}`);
+    }
   }
   lines.push('');
 
   lines.push('## Recommended actions', '');
   if (report.recommendations.length === 0) lines.push('- Collect more evidence before acting.');
-  else for (const recommendation of report.recommendations) lines.push(`- ${recommendation}`);
+  else for (const recommendation of report.recommendations) lines.push(`- ${escapeMarkdown(recommendation)}`);
   lines.push('');
 
   if (mission.reporting.includeEvidenceIndex) {
     lines.push('## Evidence index', '', '| ID | Type | Source | Integrity | Independence |', '| --- | --- | --- | --- | --- |');
     for (const item of report.evidenceIndex) {
-      lines.push(`| \`${item.evidenceId}\` | ${item.type} | ${escapePipe(item.source.identifier)} | ${item.integrity} | ${escapePipe(item.independenceGroup)} |`);
+      lines.push(`| \`${escapeCode(item.evidenceId)}\` | ${escapeTable(item.type)} | ${escapeTable(item.source.identifier)} | ${escapeTable(item.integrity)} | ${escapeTable(item.independenceGroup)} |`);
     }
     lines.push('');
   }
 
   if (mission.reporting.includeLimitations) {
     lines.push('## Limitations', '');
-    for (const limitation of report.limitations) lines.push(`- ${limitation}`);
+    for (const limitation of report.limitations) lines.push(`- ${escapeMarkdown(limitation)}`);
     lines.push('');
   }
 
-  lines.push('## Safety statement', '', 'This Phase 3 run was read-only. Ants did not execute remediation or contact external services. It wrote only the report artifacts listed above and did not mutate in-scope evidence files.', '');
+  lines.push(
+    '## Safety statement',
+    '',
+    'This Phase 3 run was read-only. Ants did not execute remediation or contact external services. Report writes were restricted to the workspace `.ants` directory.',
+    ''
+  );
   return `${lines.join('\n')}\n`;
 }
 
-async function atomicJson(filePath, value) {
-  await atomicText(filePath, `${JSON.stringify(value, null, 2)}\n`);
-}
-
-async function atomicText(filePath, value) {
-  const tempPath = `${filePath}.tmp-${process.pid}`;
-  await writeFile(tempPath, value, 'utf8');
-  await rename(tempPath, filePath);
-}
-
 function escapeMarkdown(value) {
-  return String(value).replace(/[\\`*_{}[\]()#+.!|-]/g, '\\$&');
+  return String(value).replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/[\\`*_{}[\]()#+.!|>-]/g, '\\$&');
 }
 
-function escapePipe(value) {
-  return String(value).replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+function escapeCode(value) {
+  return String(value).replace(/`/g, '\\`').replace(/[\r\n]/g, ' ');
+}
+
+function escapeTable(value) {
+  return escapeMarkdown(value).replace(/\|/g, '\\|').replace(/[\r\n]/g, ' ');
 }
